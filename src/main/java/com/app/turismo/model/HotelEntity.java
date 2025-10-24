@@ -31,14 +31,14 @@ public class HotelEntity {
 
     @Column(name = "nombre", nullable = false)
     private String nombre;
-    
-    @Column(name = "addres", nullable = false)
-    private String addres;
 
-    @Column(name = "price", nullable =  false)
+    @Column(name = "direccion", nullable = false)
+    private String direccion;
+
+    @Column(name = "price", nullable = false)
     private Double price;
 
     @Column(name = "acomodacion", nullable = false)
     private String acomodacion;
-   
+
 }
