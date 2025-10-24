@@ -1,4 +1,0 @@
-DB_URL=jdbc:mysql://localhost:3306/turismo_db
-DB_USER=root
-DB_PASS=admin
-JWT_SECRET=98uwhy7ysadferqw44tfasf454srfwr64rsfgsdfgsdfg
