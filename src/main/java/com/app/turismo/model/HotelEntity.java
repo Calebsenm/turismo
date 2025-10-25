@@ -1,10 +1,9 @@
 package com.app.turismo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -18,27 +17,18 @@ public class HotelEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long hotel_id;
 
-    @ManyToOne
-    @JoinColumn(name = "destino_id", referencedColumnName = "destino_id")
-    private DestinoEntity destino;
-
-    @Column(name = "nombre", nullable = false)
+    @Column(nullable = false)
     private String nombre;
 
-    @Column(name = "direccion", nullable = false)
-    private String direccion;
-
-    // 💰 Tarifa base para adulto
-    @Column(name = "tarifa_adulto", nullable = false)
+    @Column(nullable = false)
     private Double tarifaAdulto;
 
-    // 💰 Tarifa especial para niño (<8 años)
-    @Column(name = "tarifa_nino", nullable = false)
+    @Column(nullable = false)
     private Double tarifaNino;
 
-    @Column(name = "acomodacion", nullable = false)
-    private String acomodacion;
-
-    @Column(name = "disponibilidad", nullable = false)
-    private Boolean disponibilidad = true;
+    @ManyToOne
+    @JoinColumn(name = "destino_id", referencedColumnName = "destino_id")
+    @JsonBackReference
+    @JsonIgnoreProperties({ "hoteles", "paquetes" }) // evita recursión
+    private DestinoEntity destino;
 }

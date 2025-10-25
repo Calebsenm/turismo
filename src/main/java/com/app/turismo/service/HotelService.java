@@ -35,12 +35,9 @@ public class HotelService {
         return hotelRepository.findById(id)
                 .map(hotel -> {
                     hotel.setNombre(hotelActualizado.getNombre());
-                    hotel.setDireccion(hotelActualizado.getDireccion());
                     hotel.setTarifaAdulto(hotelActualizado.getTarifaAdulto());
                     hotel.setTarifaNino(hotelActualizado.getTarifaNino());
-                    hotel.setAcomodacion(hotelActualizado.getAcomodacion());
                     hotel.setDestino(hotelActualizado.getDestino());
-                    hotel.setDisponibilidad(hotelActualizado.getDisponibilidad());
                     return hotelRepository.save(hotel);
                 })
                 .orElseThrow(() -> new RuntimeException("Hotel no encontrado con id: " + id));

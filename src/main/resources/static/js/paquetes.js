@@ -1,7 +1,7 @@
 const API = "http://localhost:8080/api";
 let hoteles = [], transportes = [], actividades = [];
 
-// Cargar destinos
+// 🌎 Cargar destinos
 async function cargarDestinos() {
     try {
         const response = await fetch(`${API}/destinos`);
@@ -19,36 +19,61 @@ async function cargarDestinos() {
     }
 }
 
-
-// Cargar datos filtrados según destino
+// 🔹 Cargar datos filtrados según destino
 document.getElementById("destino").addEventListener("change", async e => {
     const destinoId = e.target.value;
     if (!destinoId) return;
 
     document.getElementById("seccion-opciones").style.display = "block";
-    const [hot, trans, act] = await Promise.all([
-        fetch(`${API}/hoteles`).then(r => r.json()),
-        fetch(`${API}/transportes`).then(r => r.json()),
-        fetch(`${API}/actividades`).then(r => r.json())
-    ]);
 
-    hoteles = hot.filter(h => h.destino.destino_id == destinoId);
-    transportes = trans.filter(t => t.destino.destino_id == destinoId);
-    actividades = act.filter(a => a.destino.destino_id == destinoId);
+    try {
+        // Traemos el destino seleccionado con sus relaciones
+        const destinoData = await fetch(`${API}/destinos/${destinoId}`).then(r => r.json());
+        console.log("🟢 Destino seleccionado:", destinoData);
 
-    cargarSelect("hotel", hoteles, (h) => `${h.nombre} - Adulto: $${h.tarifaAdulto} / Niño: $${h.tarifaNino}`,
-        (h) => `data-tarifa-adulto="${h.tarifaAdulto}" data-tarifa-nino="${h.tarifaNino}"`);
-    cargarSelect("transporte", transportes, (t) => `${t.tipo} - ${t.empresa} ($${t.precio})`, (t) => `data-precio="${t.precio}"`);
-    cargarSelect("actividades", actividades, (a) => `${a.nombre} ($${a.precio})`, (a) => `data-precio="${a.precio}"`);
+        hoteles = destinoData.hoteles || [];
+        actividades = destinoData.actividades || [];
+        transportes = destinoData.transportes || [];
+
+        // Resetear valores
+        document.getElementById("numAdultos").value = 1;
+        document.getElementById("numNinos").value = 0;
+
+        // Cargar selectores
+        cargarSelect("hotel", hoteles, (h) => `${h.nombre} - Adulto: $${h.tarifaAdulto} / Niño: $${h.tarifaNino}`,
+            (h) => `data-tarifa-adulto="${h.tarifaAdulto}" data-tarifa-nino="${h.tarifaNino}"`);
+
+        cargarSelect("transporte", transportes, (t) => `${t.tipo} - ${t.empresa} ($${t.precio})`,
+            (t) => `data-precio="${t.precio}"`);
+
+        cargarSelect("actividades", actividades, (a) => `${a.nombre} ($${a.precio})`,
+            (a) => `data-precio="${a.precio}"`);
+
+        // 🔹 Recalcular total automáticamente
+        calcularTotal();
+
+    } catch (err) {
+        console.error("❌ Error cargando datos del destino:", err);
+    }
 });
+
 
 function cargarSelect(id, lista, texto, extraAttr) {
     const sel = document.getElementById(id);
-    sel.innerHTML = "";
-    lista.forEach(i => sel.innerHTML += `<option value="${i.id || i[Object.keys(i)[0]]}" ${extraAttr(i)}>${texto(i)}</option>`);
+    sel.innerHTML = ""; // Limpia el select
+
+    if (!lista || lista.length === 0) {
+        sel.innerHTML = `<option value="">-- No hay opciones disponibles --</option>`;
+        return;
+    }
+
+    lista.forEach(i => {
+        const valor = i.id || i.hotel_id || i.transporte_id || i.actividad_id || i[Object.keys(i)[0]];
+        sel.innerHTML += `<option value="${valor}" ${extraAttr(i)}>${texto(i)}</option>`;
+    });
 }
 
-// Calcular total dinámico
+// 💰 Calcular total dinámico
 function calcularTotal() {
     let total = 0;
     const adultos = parseInt(document.getElementById("numAdultos").value || 0);
@@ -61,7 +86,7 @@ function calcularTotal() {
     }
 
     [...document.getElementById("transporte").selectedOptions].forEach(t => total += parseFloat(t.dataset.precio || 0));
-    [...document.getElementById("actividades").selectedOptions].forEach(a => total += parseFloat(a.dataset.precio || 0));
+    [...document.getElementById("actividades").selectedOptions].forEach(a => total += parseFloat(a.dataset.precio || 0)*(adultos + ninos));
 
     document.getElementById("total").textContent = total.toLocaleString();
     return total;
@@ -71,21 +96,20 @@ function calcularTotal() {
     document.getElementById(id).addEventListener("change", calcularTotal)
 );
 
-// Guardar paquete
+// 💾 Guardar paquete
 document.getElementById("btnGuardar").addEventListener("click", async () => {
     const paquete = {
-    usuario: { user_id: 1 },
-    origen: document.getElementById("origen").value,  // 🔹 NUEVO
-    destino: { destino_id: document.getElementById("destino").value },
-    fechaInicio: document.getElementById("fechaInicio").value,
-    fechaFin: document.getElementById("fechaFin").value,
-    numAdultos: parseInt(document.getElementById("numAdultos").value),
-    numNinos: parseInt(document.getElementById("numNinos").value),
-    costoTotal: calcularTotal(),
-    nombre: "Paquete personalizado",
-    descripcion: "Cotización creada por el cliente"
-};
-
+        usuario: { user_id: 1 },
+        origen: document.getElementById("origen").value,
+        destino: { destino_id: document.getElementById("destino").value },
+        fechaInicio: document.getElementById("fechaInicio").value,
+        fechaFin: document.getElementById("fechaFin").value,
+        numAdultos: parseInt(document.getElementById("numAdultos").value),
+        numNinos: parseInt(document.getElementById("numNinos").value),
+        costoTotal: calcularTotal(),
+        nombre: "Paquete personalizado",
+        descripcion: "Cotización creada por el cliente"
+    };
 
     const res = await fetch(`${API}/paquetes`, {
         method: "POST",
@@ -103,7 +127,7 @@ document.getElementById("btnGuardar").addEventListener("click", async () => {
     }
 });
 
-// Cargar paquetes prearmados (por ahora estáticos)
+// 🎒 Paquetes prearmados
 function cargarPaquetesPrearmados() {
     const lista = [
         { nombre: "Plan Familiar en Coveñas", descripcion: "3 días con hotel y lancha", precio: 780000 },

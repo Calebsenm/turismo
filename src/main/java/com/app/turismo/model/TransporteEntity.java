@@ -1,17 +1,8 @@
 package com.app.turismo.model;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Getter
 @Setter
@@ -20,12 +11,14 @@ import lombok.Setter;
 @Entity
 @Table(name = "transporte")
 public class TransporteEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long transporte_id;
 
     @ManyToOne
     @JoinColumn(name = "destino_id", referencedColumnName = "destino_id")
+    @JsonBackReference // 🔹 Evita bucles al devolver el JSON
     private DestinoEntity destino;
 
     @Column(name = "tipo", nullable = false)
@@ -33,8 +26,7 @@ public class TransporteEntity {
 
     @Column(name = "empresa", nullable = false)
     private String empresa;
-    
+
     @Column(name = "precio", nullable = false)
     private Double precio;
-
 }
