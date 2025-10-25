@@ -7,7 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
 
 @Getter
@@ -16,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "usuario")
-public class UsuarioEntity {
+public class UsuarioEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +32,7 @@ public class UsuarioEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "user_type", nullable = false)
@@ -36,5 +40,36 @@ public class UsuarioEntity {
 
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PaqueteEntity> paquetes;
-}
 
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+      return List.of(new SimpleGrantedAuthority("ROLE_" + this.userType.toUpperCase()));
+    }
+
+    @Override
+    public String getUsername() {
+      return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; 
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true; 
+    }
+}

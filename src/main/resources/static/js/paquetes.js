@@ -1,11 +1,24 @@
 const API = "http://localhost:8080/api";
 let hoteles = [], transportes = [], actividades = [];
 
+// Función para obtener las cabeceras de autenticación
+function getAuthHeaders() {
+    const token = localStorage.getItem('jwtToken');
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
+
 // Cargar destinos
 async function cargarDestinos() {
     try {
-        const response = await fetch(`${API}/destinos`);
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        const response = await fetch(`${API}/destinos`, { headers: getAuthHeaders() });
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = "/public/login";
+            return;
+        }
+        if (!response.ok) throw new Error(`Error HTTP cargando destinos: ${response.status}`);
         const destinos = await response.json();
         console.log("🌎 Destinos obtenidos:", destinos);
 
@@ -26,11 +39,23 @@ document.getElementById("destino").addEventListener("change", async e => {
     if (!destinoId) return;
 
     document.getElementById("seccion-opciones").style.display = "block";
-    const [hot, trans, act] = await Promise.all([
-        fetch(`${API}/hoteles`).then(r => r.json()),
-        fetch(`${API}/transportes`).then(r => r.json()),
-        fetch(`${API}/actividades`).then(r => r.json())
-    ]);
+    
+    const fetchData = async (url) => {
+        const response = await fetch(url, { headers: getAuthHeaders() });
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = "/public/login";
+            throw new Error("Unauthorized");
+        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+    };
+
+    try {
+        const [hot, trans, act] = await Promise.all([
+            fetchData(`${API}/hoteles`),
+            fetchData(`${API}/transportes`),
+            fetchData(`${API}/actividades`)
+        ]);
 
     hoteles = hot.filter(h => h.destino.destino_id == destinoId);
     transportes = trans.filter(t => t.destino.destino_id == destinoId);
@@ -40,6 +65,11 @@ document.getElementById("destino").addEventListener("change", async e => {
         (h) => `data-tarifa-adulto="${h.tarifaAdulto}" data-tarifa-nino="${h.tarifaNino}"`);
     cargarSelect("transporte", transportes, (t) => `${t.tipo} - ${t.empresa} ($${t.precio})`, (t) => `data-precio="${t.precio}"`);
     cargarSelect("actividades", actividades, (a) => `${a.nombre} ($${a.precio})`, (a) => `data-precio="${a.precio}"`);
+    } catch (error) {
+        if (error.message !== "Unauthorized") {
+            console.error("❌ Error cargando opciones del destino:", error);
+        }
+    }
 });
 
 function cargarSelect(id, lista, texto, extraAttr) {
@@ -89,16 +119,21 @@ document.getElementById("btnGuardar").addEventListener("click", async () => {
 
     const res = await fetch(`${API}/paquetes`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(paquete)
     });
 
     const mensaje = document.getElementById("mensaje");
     if (res.ok) {
-        mensaje.textContent = "✅ Paquete guardado con éxito.";
+        mensaje.textContent = "✅ Paquete guardado con éxito. Redirigiendo...";
         mensaje.className = "text-success";
+        setTimeout(() => window.location.href = '/public/home', 2000); // O a una página de "mis paquetes"
+    } else if (res.status === 401 || res.status === 403) {
+        window.location.href = "/public/login";
     } else {
-        mensaje.textContent = "❌ Error al guardar el paquete.";
+        const errorData = await res.json();
+        console.error("Error data:", errorData);
+        mensaje.textContent = `❌ Error al guardar el paquete: ${errorData.message || 'Intente de nuevo.'}`;
         mensaje.className = "text-danger";
     }
 });

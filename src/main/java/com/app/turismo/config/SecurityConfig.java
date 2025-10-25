@@ -15,8 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import com.app.turismo.config.Jwt.CustomAuthenticationEntryPoint;
 import com.app.turismo.config.Jwt.JwtAuthFilter;
 
 @Configuration
@@ -24,15 +22,13 @@ import com.app.turismo.config.Jwt.JwtAuthFilter;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Value("${cors.allowed.origins}")
     private String allowedOrigins;
 
     @Autowired
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
-        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Bean
@@ -40,13 +36,24 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1/api/auth/**").permitAll()
+                        .requestMatchers( // Public endpoints
+                                "/",
+                                "/v1/api/auth/**", // Endpoints de login/registro
+                                "/error",
+                                "/public/**",       // Permitir acceso a TODAS las páginas públicas (HTML/Vistas)
+                                                    // La seguridad se aplica en el frontend (auth-guard.js) y en las APIs.
+                                "/access-denied",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**")
+                        .permitAll()
+                        .requestMatchers("/api/**").authenticated() // Proteger TODOS los endpoints de la API
                         .anyRequest().authenticated())
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(customAuthenticationEntryPoint)
-                );
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Añadimos el filtro de redirección
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class) // Añadimos el filtro de redirección
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/public/login")) // Si no está autenticado, redirige al login
+                        .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect("/access-denied")));
 
         return http.build();
     }
