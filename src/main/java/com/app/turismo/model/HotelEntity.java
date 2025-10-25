@@ -1,14 +1,6 @@
 package com.app.turismo.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +13,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "hotel")
 public class HotelEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long hotel_id;
@@ -31,14 +24,21 @@ public class HotelEntity {
 
     @Column(name = "nombre", nullable = false)
     private String nombre;
-    
-    @Column(name = "addres", nullable = false)
-    private String addres;
 
-    @Column(name = "price", nullable =  false)
-    private Double price;
+    @Column(name = "direccion", nullable = false)
+    private String direccion;
+
+    // 💰 Tarifa base para adulto
+    @Column(name = "tarifa_adulto", nullable = false)
+    private Double tarifaAdulto;
+
+    // 💰 Tarifa especial para niño (<8 años)
+    @Column(name = "tarifa_nino", nullable = false)
+    private Double tarifaNino;
 
     @Column(name = "acomodacion", nullable = false)
     private String acomodacion;
-   
+
+    @Column(name = "disponibilidad", nullable = false)
+    private Boolean disponibilidad = true;
 }
