@@ -1,13 +1,15 @@
 package com.app.turismo.controller;
 
-import com.app.turismo.model.PaqueteEntity;
-import com.app.turismo.service.PaqueteService;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.app.turismo.model.PaqueteEntity;
+import com.app.turismo.service.PaqueteService;
 
 @RestController
 @RequestMapping("/api/paquetes")
@@ -17,42 +19,47 @@ public class PaqueteController {
     @Autowired
     private PaqueteService paqueteService;
 
-    // Obtener todos los paquetes
+    // 🧭 Listar todos los paquetes
     @GetMapping
     public ResponseEntity<List<PaqueteEntity>> listarPaquetes() {
         return ResponseEntity.ok(paqueteService.listarPaquetes());
     }
 
-    // Obtener un paquete por ID
+    // 🔎 Buscar paquete por ID
     @GetMapping("/{id}")
     public ResponseEntity<PaqueteEntity> obtenerPaquetePorId(@PathVariable Long id) {
-        return paqueteService.obtenerPaquetePorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<PaqueteEntity> paquete = paqueteService.buscarPaquetePorId(id);
+        return paquete.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Crear un nuevo paquete
+    // ➕ Crear nuevo paquete (calcula costo automáticamente)
     @PostMapping
     public ResponseEntity<PaqueteEntity> crearPaquete(@RequestBody PaqueteEntity paquete) {
-        PaqueteEntity nuevoPaquete = paqueteService.crearPaquete(paquete);
+        PaqueteEntity nuevoPaquete = paqueteService.guardarPaquete(paquete);
         return new ResponseEntity<>(nuevoPaquete, HttpStatus.CREATED);
     }
 
-    // Actualizar un paquete existente
+    // 🔁 Actualizar paquete
     @PutMapping("/{id}")
-    public ResponseEntity<PaqueteEntity> actualizarPaquete(@PathVariable Long id, @RequestBody PaqueteEntity detalles) {
-        return paqueteService.actualizarPaquete(id, detalles)
-                .map(actualizado -> new ResponseEntity<>(actualizado, HttpStatus.OK))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<PaqueteEntity> actualizarPaquete(@PathVariable Long id,
+            @RequestBody PaqueteEntity paqueteActualizado) {
+        try {
+            PaqueteEntity actualizado = paqueteService.actualizarPaquete(id, paqueteActualizado);
+            return ResponseEntity.ok(actualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // Eliminar paquete
+    // ❌ Eliminar paquete
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarPaquete(@PathVariable Long id) {
-        boolean eliminado = paqueteService.eliminarPaquete(id);
-        if (eliminado) {
+        try {
+            paqueteService.eliminarPaquete(id);
             return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
     }
 }

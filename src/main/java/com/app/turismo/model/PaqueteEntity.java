@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.time.LocalDate;
 
 @Getter
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "paquete")
 public class PaqueteEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paquete_id;
@@ -25,6 +27,10 @@ public class PaqueteEntity {
     @ManyToOne
     @JoinColumn(name = "destino_id", referencedColumnName = "destino_id")
     private DestinoEntity destino;
+
+    // 🔹 Nueva columna: ciudad de origen
+    @Column(name = "origen", nullable = false)
+    private String origen;
 
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
@@ -40,4 +46,14 @@ public class PaqueteEntity {
 
     @Column(name = "descripcion", nullable = false)
     private String descripcion;
+
+    // 🔹 Campos adicionales para personas
+    @Column(name = "num_adultos", nullable = false)
+    private Integer numAdultos;
+
+    @Column(name = "num_ninos", nullable = false)
+    private Integer numNinos;
+
+    @Column(name = "tipo_paquete")
+    private String tipoPaquete; // "familiar", "romántico", "grupal", etc.
 }

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.app.turismo.model.PaqueteEntity;
 
 @Repository
-public interface PaqueteRepository extends JpaRepository<PaqueteEntity, Long>{
-    
+public interface PaqueteRepository extends JpaRepository<PaqueteEntity, Long> {
+
 }

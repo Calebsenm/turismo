@@ -1,0 +1,67 @@
+body {
+    background-color: #f7f7f7;
+    font-family: 'Poppins', sans-serif;
+}
+
+h2, h4 {
+    color: #333;
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Barra superior tipo Airbnb */
+.filtro-bar {
+    border-radius: 50px;
+    padding: 20px 25px;
+    background: #fff;
+}
+
+.filtro-bar input,
+.filtro-bar select {
+    border-radius: 12px !important;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease;
+}
+
+.filtro-bar input:focus,
+.filtro-bar select:focus {
+    border-color: #ff385c;
+    box-shadow: 0 0 5px rgba(255, 56, 92, 0.4);
+}
+
+/* Botones estilo Airbnb */
+.btn-primary {
+    background-color: #ff385c;
+    border: none;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #e31c5f;
+}
+
+/* Total */
+.total-box {
+    background-color: #fff7f5;
+    border: 1px solid #ffdada;
+    border-radius: 12px;
+    color: #e31c5f;
+    font-weight: 600;
+}
+
+/* Cards prearmadas */
+.paquete-card {
+    border-radius: 16px;
+    transition: transform .2s;
+}
+
+.paquete-card:hover {
+    transform: scale(1.03);
+}
