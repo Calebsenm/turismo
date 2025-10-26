@@ -1,3 +1,13 @@
+// Listener para cerrar sesión en cualquier vista
+document.addEventListener('DOMContentLoaded', () => {
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/public/login';
+        });
+    }
+});
 const API = "http://localhost:8080/api";
 let hoteles = [], transportes = [], actividades = [];
 

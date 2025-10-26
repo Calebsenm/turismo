@@ -26,10 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageDiv.textContent = '¡Inicio de sesión exitoso! Redirigiendo...';
                 messageDiv.style.color = 'green';
 
-                // Redirigir a la página principal después de 1 segundo
-                setTimeout(() => {
+                // Consultar el rol del usuario y redirigir según corresponda
+                try {
+                    const userRes = await fetch('/api/usuarios/me', {
+                        headers: { 'Authorization': 'Bearer ' + data.token }
+                    });
+                    if (userRes.ok) {
+                        const userData = await userRes.json();
+                        if (userData.userType && userData.userType.toUpperCase() === 'ADMIN') {
+                            window.location.href = '/admin-panel';
+                        } else {
+                            window.location.href = '/public/home';
+                        }
+                    } else {
+                        window.location.href = '/public/home';
+                    }
+                } catch (err) {
                     window.location.href = '/public/home';
-                }, 1000);
+                }
             } else {
                 const errorData = await response.json();
                 messageDiv.textContent = `Error: ${errorData.message || 'Credenciales inválidas.'}`;

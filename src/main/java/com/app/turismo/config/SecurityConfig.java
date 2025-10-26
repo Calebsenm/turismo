@@ -45,10 +45,9 @@ public class SecurityConfig {
                                                                 "/css/**",
                                                                 "/js/**",
                                                                 "/images/**",
-                                                                "/admin-panel",
                                                                 "/api/usuarios/me")
                                                 .permitAll()
-                                                .requestMatchers("/api/usuarios/me").permitAll()
+                                                .requestMatchers("/admin-panel").hasAuthority("ROLE_ADMIN")
                                                 .requestMatchers("/api/**").authenticated()
                                                 .anyRequest().authenticated())
                                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

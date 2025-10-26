@@ -1,3 +1,13 @@
+// Listener para cerrar sesión en cualquier vista
+document.addEventListener('DOMContentLoaded', () => {
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/public/login';
+        });
+    }
+});
 // admin.js
 // Lógica para manejar formularios y peticiones AJAX del panel de administración
 
