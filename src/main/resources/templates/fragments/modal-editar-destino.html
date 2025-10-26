@@ -1,0 +1,32 @@
+<!-- templates/fragments/modal-editar-destino.html -->
+<div th:fragment="modalEditarDestino">
+  <div class="modal fade" id="modalEditarDestino" tabindex="-1" aria-labelledby="modalEditarDestinoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="formEditarDestino" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarDestinoLabel">Editar destino</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editDestinoId">
+          <div class="mb-2">
+            <label for="editNombreDestino" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="editNombreDestino" required>
+          </div>
+          <div class="mb-2">
+            <label for="editDescripcionDestino" class="form-label">Descripción</label>
+            <input type="text" class="form-control" id="editDescripcionDestino" required>
+          </div>
+          <div class="mb-2">
+            <label for="editUbicacionDestino" class="form-label">Ubicación</label>
+            <input type="text" class="form-control" id="editUbicacionDestino" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

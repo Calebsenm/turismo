@@ -53,6 +53,12 @@
             </li>
         </ul>
         <div class="tab-content" id="adminTabsContent">
+            <!-- Modales para editar hotel, actividad y transporte -->
+            <div th:replace="fragments/modal-editar-hotel :: modalEditarHotel"></div>
+            <div th:replace="fragments/modal-editar-actividad :: modalEditarActividad"></div>
+            <div th:replace="fragments/modal-editar-transporte :: modalEditarTransporte"></div>
+            <!-- Modal para editar destino -->
+            <div th:replace="fragments/modal-editar-destino :: modalEditarDestino"></div>
                         <!-- Modal para editar usuario -->
                         <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-labelledby="modalEditarUsuarioLabel" aria-hidden="true">
                             <div class="modal-dialog">
@@ -125,92 +131,132 @@
                 </div>
             </div>
             <div class="tab-pane fade show active" id="destinos" role="tabpanel">
-                <h4>Crear Destino</h4>
-                <form id="formDestino" class="mb-4">
-                    <div class="mb-3">
-                        <label for="nombreDestino" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="nombreDestino" required>
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h4>Crear Destino</h4>
+                        <form id="formDestino" class="mb-4">
+                            <div class="mb-3">
+                                <label for="nombreDestino" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombreDestino" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="descripcionDestino" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcionDestino" rows="2" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ubicacionDestino" class="form-label">Ubicación</label>
+                                <input type="text" class="form-control" id="ubicacionDestino" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Guardar Destino</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="descripcionDestino" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="descripcionDestino" rows="2" required></textarea>
+                    <div class="col-md-6">
+                        <h4>Lista de Destinos</h4>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="filtroDestino" placeholder="Buscar destino por nombre...">
+                        </div>
+                        <div id="listaDestinos"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="ubicacionDestino" class="form-label">Ubicación</label>
-                        <input type="text" class="form-control" id="ubicacionDestino" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar Destino</button>
-                </form>
-                <div id="listaDestinos"></div>
+                </div>
             </div>
             <div class="tab-pane fade" id="hoteles" role="tabpanel">
-                <h4>Crear Hotel</h4>
-                <form id="formHotel" class="mb-4">
-                    <div class="mb-3">
-                        <label for="nombreHotel" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="nombreHotel" required>
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h4>Crear Hotel</h4>
+                        <form id="formHotel" class="mb-4">
+                            <div class="mb-3">
+                                <label for="nombreHotel" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombreHotel" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tarifaAdultoHotel" class="form-label">Tarifa Adulto</label>
+                                <input type="number" class="form-control" id="tarifaAdultoHotel" required min="0" step="0.01">
+                            </div>
+                            <div class="mb-3">
+                                <label for="tarifaNinoHotel" class="form-label">Tarifa Niño</label>
+                                <input type="number" class="form-control" id="tarifaNinoHotel" required min="0" step="0.01">
+                            </div>
+                            <div class="mb-3">
+                                <label for="destinoHotel" class="form-label">Destino</label>
+                                <select id="destinoHotel" class="form-select" required></select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Guardar Hotel</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="tarifaAdultoHotel" class="form-label">Tarifa Adulto</label>
-                        <input type="number" class="form-control" id="tarifaAdultoHotel" required min="0" step="0.01">
+                    <div class="col-md-6">
+                        <h4>Lista de Hoteles</h4>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="filtroHotel" placeholder="Buscar hotel por nombre...">
+                        </div>
+                        <div id="listaHoteles"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="tarifaNinoHotel" class="form-label">Tarifa Niño</label>
-                        <input type="number" class="form-control" id="tarifaNinoHotel" required min="0" step="0.01">
-                    </div>
-                    <div class="mb-3">
-                        <label for="destinoHotel" class="form-label">Destino</label>
-                        <select id="destinoHotel" class="form-select" required></select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar Hotel</button>
-                </form>
-                <div id="listaHoteles"></div>
+                </div>
             </div>
             <div class="tab-pane fade" id="actividades" role="tabpanel">
-                <h4>Crear Actividad</h4>
-                <form id="formActividad" class="mb-4">
-                    <div class="mb-3">
-                        <label for="nombreActividad" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="nombreActividad" required>
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h4>Crear Actividad</h4>
+                        <form id="formActividad" class="mb-4">
+                            <div class="mb-3">
+                                <label for="nombreActividad" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombreActividad" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="descripcionActividad" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcionActividad" rows="2" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="precioActividad" class="form-label">Precio</label>
+                                <input type="number" class="form-control" id="precioActividad" required min="0" step="0.01">
+                            </div>
+                            <div class="mb-3">
+                                <label for="destinoActividad" class="form-label">Destino</label>
+                                <select id="destinoActividad" class="form-select" required></select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Guardar Actividad</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="descripcionActividad" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="descripcionActividad" rows="2" required></textarea>
+                    <div class="col-md-6">
+                        <h4>Lista de Actividades</h4>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="filtroActividad" placeholder="Buscar actividad por nombre...">
+                        </div>
+                        <div id="listaActividades"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="precioActividad" class="form-label">Precio</label>
-                        <input type="number" class="form-control" id="precioActividad" required min="0" step="0.01">
-                    </div>
-                    <div class="mb-3">
-                        <label for="destinoActividad" class="form-label">Destino</label>
-                        <select id="destinoActividad" class="form-select" required></select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar Actividad</button>
-                </form>
-                <div id="listaActividades"></div>
+                </div>
             </div>
             <div class="tab-pane fade" id="transporte" role="tabpanel">
-                <h4>Crear Transporte</h4>
-                <form id="formTransporte" class="mb-4">
-                    <div class="mb-3">
-                        <label for="tipoTransporte" class="form-label">Tipo</label>
-                        <input type="text" class="form-control" id="tipoTransporte" required>
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h4>Crear Transporte</h4>
+                        <form id="formTransporte" class="mb-4">
+                            <div class="mb-3">
+                                <label for="tipoTransporte" class="form-label">Tipo</label>
+                                <input type="text" class="form-control" id="tipoTransporte" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="empresaTransporte" class="form-label">Empresa</label>
+                                <input type="text" class="form-control" id="empresaTransporte" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="precioTransporte" class="form-label">Precio</label>
+                                <input type="number" class="form-control" id="precioTransporte" required min="0" step="0.01">
+                            </div>
+                            <div class="mb-3">
+                                <label for="destinoTransporte" class="form-label">Destino</label>
+                                <select id="destinoTransporte" class="form-select" required></select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Guardar Transporte</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="empresaTransporte" class="form-label">Empresa</label>
-                        <input type="text" class="form-control" id="empresaTransporte" required>
+                    <div class="col-md-6">
+                        <h4>Lista de Transportes</h4>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="filtroTransporte" placeholder="Buscar transporte por tipo o empresa...">
+                        </div>
+                        <div id="listaTransportes"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="precioTransporte" class="form-label">Precio</label>
-                        <input type="number" class="form-control" id="precioTransporte" required min="0" step="0.01">
-                    </div>
-                    <div class="mb-3">
-                        <label for="destinoTransporte" class="form-label">Destino</label>
-                        <select id="destinoTransporte" class="form-select" required></select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar Transporte</button>
-                </form>
-                <div id="listaTransporte"></div>
+                </div>
             </div>
         </div>
     </div>

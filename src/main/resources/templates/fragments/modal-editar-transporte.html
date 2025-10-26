@@ -1,0 +1,35 @@
+<div th:fragment="modalEditarTransporte">
+  <div class="modal fade" id="modalEditarTransporte" tabindex="-1" aria-labelledby="modalEditarTransporteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="formEditarTransporte" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarTransporteLabel">Editar transporte</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editTransporteId">
+          <div class="mb-2">
+            <label for="editTipoTransporte" class="form-label">Tipo</label>
+            <input type="text" class="form-control" id="editTipoTransporte" required>
+          </div>
+          <div class="mb-2">
+            <label for="editEmpresaTransporte" class="form-label">Empresa</label>
+            <input type="text" class="form-control" id="editEmpresaTransporte" required>
+          </div>
+          <div class="mb-2">
+            <label for="editPrecioTransporte" class="form-label">Precio</label>
+            <input type="number" class="form-control" id="editPrecioTransporte" required>
+          </div>
+          <div class="mb-2">
+            <label for="editDestinoTransporte" class="form-label">Destino</label>
+            <select class="form-select" id="editDestinoTransporte" required></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

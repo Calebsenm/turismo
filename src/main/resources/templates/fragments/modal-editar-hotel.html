@@ -1,0 +1,35 @@
+<div th:fragment="modalEditarHotel">
+  <div class="modal fade" id="modalEditarHotel" tabindex="-1" aria-labelledby="modalEditarHotelLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="formEditarHotel" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarHotelLabel">Editar hotel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editHotelId">
+          <div class="mb-2">
+            <label for="editNombreHotel" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="editNombreHotel" required>
+          </div>
+          <div class="mb-2">
+            <label for="editTarifaAdultoHotel" class="form-label">Tarifa Adulto</label>
+            <input type="number" class="form-control" id="editTarifaAdultoHotel" required>
+          </div>
+          <div class="mb-2">
+            <label for="editTarifaNinoHotel" class="form-label">Tarifa Niño</label>
+            <input type="number" class="form-control" id="editTarifaNinoHotel" required>
+          </div>
+          <div class="mb-2">
+            <label for="editDestinoHotel" class="form-label">Destino</label>
+            <select class="form-select" id="editDestinoHotel" required></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

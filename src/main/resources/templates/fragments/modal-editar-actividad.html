@@ -1,0 +1,35 @@
+<div th:fragment="modalEditarActividad">
+  <div class="modal fade" id="modalEditarActividad" tabindex="-1" aria-labelledby="modalEditarActividadLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="formEditarActividad" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarActividadLabel">Editar actividad</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editActividadId">
+          <div class="mb-2">
+            <label for="editNombreActividad" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="editNombreActividad" required>
+          </div>
+          <div class="mb-2">
+            <label for="editDescripcionActividad" class="form-label">Descripción</label>
+            <input type="text" class="form-control" id="editDescripcionActividad" required>
+          </div>
+          <div class="mb-2">
+            <label for="editPrecioActividad" class="form-label">Precio</label>
+            <input type="number" class="form-control" id="editPrecioActividad" required>
+          </div>
+          <div class="mb-2">
+            <label for="editDestinoActividad" class="form-label">Destino</label>
+            <select class="form-select" id="editDestinoActividad" required></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

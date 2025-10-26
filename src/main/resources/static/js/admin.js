@@ -112,12 +112,468 @@ function eliminarUsuario(id) {
 }
 
 // ...existing code...
+// ---- FUNCIONES DE HOTELES ----
+function cargarHoteles(){
+    fetch('/api/hoteles', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(hoteles => {
+        window._hoteles = hoteles;
+        filtrarHoteles();
+    });
+}
+
+function filtrarHoteles() {
+    const cont = document.getElementById('listaHoteles');
+    if (!cont) return;
+    const filtro = (document.getElementById('filtroHotel')?.value || '').toLowerCase();
+    cont.innerHTML = '';
+    window._hoteles.forEach(h => {
+        if (
+            h.nombre.toLowerCase().includes(filtro) ||
+            h.tarifaAdulto?.toString().includes(filtro) ||
+            h.tarifaNino?.toString().includes(filtro)
+        ) {
+            cont.innerHTML += `
+                <div class="card mb-2 p-2">
+                    <div><b>${h.nombre}</b> - <span class="text-muted">Adulto: $${h.tarifaAdulto} / Niño: $${h.tarifaNino}</span></div>
+                    <div>Destino: ${h.destino?.nombre || ''}</div>
+                    <button class="btn btn-sm btn-warning me-2" onclick="mostrarModalEditarHotel(${h.hotel_id})">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarHotel(${h.hotel_id})">Eliminar</button>
+                </div>
+            `;
+        }
+    });
+}
+
+function mostrarModalEditarHotel(id) {
+    const hotel = window._hoteles.find(h => h.hotel_id === id);
+    if (!hotel) return;
+    document.getElementById('editHotelId').value = hotel.hotel_id;
+    document.getElementById('editNombreHotel').value = hotel.nombre;
+    document.getElementById('editTarifaAdultoHotel').value = hotel.tarifaAdulto;
+    document.getElementById('editTarifaNinoHotel').value = hotel.tarifaNino;
+    // Cargar destinos en el select
+    cargarDestinosSelectEdit('editDestinoHotel', hotel.destino?.destino_id);
+    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarHotel'));
+    if (!modal) {
+        modal = new bootstrap.Modal(document.getElementById('modalEditarHotel'));
+    }
+    modal.show();
+}
+window.mostrarModalEditarHotel = mostrarModalEditarHotel;
+
+function eliminarHotel(id) {
+    if (!confirm('¿Seguro que deseas eliminar este hotel?')) return;
+    fetch(`/api/hoteles/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(() => {
+        alert('Hotel eliminado');
+        cargarHoteles();
+    });
+}
+
+// ---- FUNCIONES DE ACTIVIDADES ----
+function cargarActividades(){
+    fetch('/api/actividades', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(actividades => {
+        window._actividades = actividades;
+        filtrarActividades();
+    });
+}
+
+function filtrarActividades() {
+    const cont = document.getElementById('listaActividades');
+    if (!cont) return;
+    const filtro = (document.getElementById('filtroActividad')?.value || '').toLowerCase();
+    cont.innerHTML = '';
+    window._actividades.forEach(a => {
+        if (
+            a.nombre.toLowerCase().includes(filtro) ||
+            a.descripcion?.toLowerCase().includes(filtro) ||
+            a.precio?.toString().includes(filtro)
+        ) {
+            cont.innerHTML += `
+                <div class="card mb-2 p-2">
+                    <div><b>${a.nombre}</b> - <span class="text-muted">$${a.precio}</span></div>
+                    <div>${a.descripcion || ''}</div>
+                    <div>Destino: ${a.destino?.nombre || ''}</div>
+                    <button class="btn btn-sm btn-warning me-2" onclick="mostrarModalEditarActividad(${a.actividad_id})">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarActividad(${a.actividad_id})">Eliminar</button>
+                </div>
+            `;
+        }
+    });
+}
+
+function mostrarModalEditarActividad(id) {
+    const actividad = window._actividades.find(a => a.actividad_id === id);
+    if (!actividad) return;
+    document.getElementById('editActividadId').value = actividad.actividad_id;
+    document.getElementById('editNombreActividad').value = actividad.nombre;
+    document.getElementById('editDescripcionActividad').value = actividad.descripcion;
+    document.getElementById('editPrecioActividad').value = actividad.precio;
+    cargarDestinosSelectEdit('editDestinoActividad', actividad.destino?.destino_id);
+    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarActividad'));
+    if (!modal) {
+        modal = new bootstrap.Modal(document.getElementById('modalEditarActividad'));
+    }
+    modal.show();
+}
+window.mostrarModalEditarActividad = mostrarModalEditarActividad;
+
+function eliminarActividad(id) {
+    if (!confirm('¿Seguro que deseas eliminar esta actividad?')) return;
+    fetch(`/api/actividades/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(() => {
+        alert('Actividad eliminada');
+        cargarActividades();
+    });
+}
+
+// ---- FUNCIONES DE TRANSPORTE ----
+function cargarTransportes(){
+    fetch('/api/transportes', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(transportes => {
+        window._transportes = transportes;
+        filtrarTransportes();
+    });
+}
+
+function filtrarTransportes() {
+    const cont = document.getElementById('listaTransportes');
+    if (!cont) return;
+    const filtro = (document.getElementById('filtroTransporte')?.value || '').toLowerCase();
+    cont.innerHTML = '';
+    window._transportes.forEach(t => {
+        if (
+            t.tipo.toLowerCase().includes(filtro) ||
+            t.empresa?.toLowerCase().includes(filtro) ||
+            t.precio?.toString().includes(filtro)
+        ) {
+            cont.innerHTML += `
+                <div class="card mb-2 p-2">
+                    <div><b>${t.tipo}</b> - <span class="text-muted">${t.empresa || ''}</span> <span class="text-muted">$${t.precio}</span></div>
+                    <div>Destino: ${t.destino?.nombre || ''}</div>
+                    <button class="btn btn-sm btn-warning me-2" onclick="mostrarModalEditarTransporte(${t.transporte_id})">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarTransporte(${t.transporte_id})">Eliminar</button>
+                </div>
+            `;
+        }
+    });
+}
+
+function mostrarModalEditarTransporte(id) {
+    const transporte = window._transportes.find(t => t.transporte_id === id);
+    if (!transporte) return;
+    document.getElementById('editTransporteId').value = transporte.transporte_id;
+    document.getElementById('editTipoTransporte').value = transporte.tipo;
+    document.getElementById('editEmpresaTransporte').value = transporte.empresa;
+    document.getElementById('editPrecioTransporte').value = transporte.precio;
+    cargarDestinosSelectEdit('editDestinoTransporte', transporte.destino?.destino_id);
+    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarTransporte'));
+    if (!modal) {
+        modal = new bootstrap.Modal(document.getElementById('modalEditarTransporte'));
+    }
+    modal.show();
+}
+window.mostrarModalEditarTransporte = mostrarModalEditarTransporte;
+
+function eliminarTransporte(id) {
+    if (!confirm('¿Seguro que deseas eliminar este transporte?')) return;
+    fetch(`/api/transportes/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(() => {
+        alert('Transporte eliminado');
+        cargarTransportes();
+    });
+}
+
+// Utilidad para cargar destinos en selects de edición
+function cargarDestinosSelectEdit(selectId, selectedId) {
+    fetch('/api/destinos', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(destinos => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="">Selecciona destino...</option>';
+        destinos.forEach(d => {
+            select.innerHTML += `<option value="${d.destino_id}" ${d.destino_id === selectedId ? 'selected' : ''}>${d.nombre}</option>`;
+        });
+    });
+}
+// ---- FUNCIONES DE DESTINOS ----
+function cargarDestinos(){
+    fetch('/api/destinos', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(destinos => {
+        window._destinos = destinos;
+        filtrarDestinos();
+    });
+}
+
+function filtrarDestinos() {
+    const cont = document.getElementById('listaDestinos');
+    if (!cont) return;
+    const filtro = (document.getElementById('filtroDestino')?.value || '').toLowerCase();
+    cont.innerHTML = '';
+    window._destinos.forEach(d => {
+        if (
+            d.nombre.toLowerCase().includes(filtro) ||
+            d.descripcion?.toLowerCase().includes(filtro) ||
+            d.ubicacion?.toLowerCase().includes(filtro)
+        ) {
+            cont.innerHTML += `
+                <div class="card mb-2 p-2">
+                    <div><b>${d.nombre}</b> - <span class="text-muted">${d.ubicacion || ''}</span></div>
+                    <div>${d.descripcion || ''}</div>
+                    <button class="btn btn-sm btn-warning me-2" onclick="mostrarModalEditarDestino(${d.destino_id})">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarDestino(${d.destino_id})">Eliminar</button>
+                </div>
+            `;
+        }
+    });
+}
+
+function mostrarModalEditarDestino(id) {
+    const destino = window._destinos.find(d => d.destino_id === id);
+    if (!destino) return;
+    document.getElementById('editDestinoId').value = destino.destino_id;
+    document.getElementById('editNombreDestino').value = destino.nombre;
+    document.getElementById('editDescripcionDestino').value = destino.descripcion;
+    document.getElementById('editUbicacionDestino').value = destino.ubicacion;
+    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarDestino'));
+    if (!modal) {
+        modal = new bootstrap.Modal(document.getElementById('modalEditarDestino'));
+    }
+    modal.show();
+}
+window.mostrarModalEditarDestino = mostrarModalEditarDestino;
+
+function eliminarDestino(id) {
+    if (!confirm('¿Seguro que deseas eliminar este destino?')) return;
+    fetch(`/api/destinos/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(() => {
+        alert('Destino eliminado');
+        cargarDestinos();
+    });
+}
     // Usuarios
     const formUsuario = document.getElementById('formUsuario');
     if (formUsuario) {
         formUsuario.addEventListener('submit', crearUsuario);
         cargarUsuarios();
     }
+
+        // Hoteles
+        const formHotel = document.getElementById('formHotel');
+        if (formHotel) {
+            formHotel.addEventListener('submit', crearHotel);
+            cargarHoteles();
+        }
+        const filtroHotelInput = document.getElementById('filtroHotel');
+        if (filtroHotelInput) {
+            filtroHotelInput.addEventListener('input', filtrarHoteles);
+        }
+        window._hoteles = [];
+
+        // Guardar cambios del hotel editado
+        const formEditarHotel = document.getElementById('formEditarHotel');
+        if (formEditarHotel) {
+            formEditarHotel.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const id = document.getElementById('editHotelId').value;
+                const nombre = document.getElementById('editNombreHotel').value;
+                const tarifaAdulto = parseFloat(document.getElementById('editTarifaAdultoHotel').value);
+                const tarifaNino = parseFloat(document.getElementById('editTarifaNinoHotel').value);
+                const destinoId = document.getElementById('editDestinoHotel').value;
+                let body = { nombre, tarifaAdulto, tarifaNino, destinoId };
+                fetch(`/api/hoteles/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Error al actualizar hotel');
+                    return res.json();
+                })
+                .then(() => {
+                    alert('Hotel actualizado');
+                    cargarHoteles();
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarHotel'));
+                    if (modal) modal.hide();
+                })
+                .catch(() => {
+                    alert('No se pudo actualizar el hotel. Verifica los datos.');
+                });
+            });
+        }
+
+        // Actividades
+        const formActividad = document.getElementById('formActividad');
+        if (formActividad) {
+            formActividad.addEventListener('submit', crearActividad);
+            cargarActividades();
+        }
+        const filtroActividadInput = document.getElementById('filtroActividad');
+        if (filtroActividadInput) {
+            filtroActividadInput.addEventListener('input', filtrarActividades);
+        }
+        window._actividades = [];
+
+        // Guardar cambios de la actividad editada
+        const formEditarActividad = document.getElementById('formEditarActividad');
+        if (formEditarActividad) {
+            formEditarActividad.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const id = document.getElementById('editActividadId').value;
+                const nombre = document.getElementById('editNombreActividad').value;
+                const descripcion = document.getElementById('editDescripcionActividad').value;
+                const precio = parseFloat(document.getElementById('editPrecioActividad').value);
+                const destinoId = document.getElementById('editDestinoActividad').value;
+                let body = { nombre, descripcion, precio, destinoId };
+                fetch(`/api/actividades/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Error al actualizar actividad');
+                    return res.json();
+                })
+                .then(() => {
+                    alert('Actividad actualizada');
+                    cargarActividades();
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarActividad'));
+                    if (modal) modal.hide();
+                })
+                .catch(() => {
+                    alert('No se pudo actualizar la actividad. Verifica los datos.');
+                });
+            });
+        }
+
+        // Transporte
+        const formTransporte = document.getElementById('formTransporte');
+        if (formTransporte) {
+            formTransporte.addEventListener('submit', crearTransporte);
+            cargarTransportes();
+        }
+        const filtroTransporteInput = document.getElementById('filtroTransporte');
+        if (filtroTransporteInput) {
+            filtroTransporteInput.addEventListener('input', filtrarTransportes);
+        }
+        window._transportes = [];
+
+        // Guardar cambios del transporte editado
+        const formEditarTransporte = document.getElementById('formEditarTransporte');
+        if (formEditarTransporte) {
+            formEditarTransporte.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const id = document.getElementById('editTransporteId').value;
+                const tipo = document.getElementById('editTipoTransporte').value;
+                const empresa = document.getElementById('editEmpresaTransporte').value;
+                const precio = parseFloat(document.getElementById('editPrecioTransporte').value);
+                const destinoId = document.getElementById('editDestinoTransporte').value;
+                let body = { tipo, empresa, precio, destinoId };
+                fetch(`/api/transportes/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Error al actualizar transporte');
+                    return res.json();
+                })
+                .then(() => {
+                    alert('Transporte actualizado');
+                    cargarTransportes();
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarTransporte'));
+                    if (modal) modal.hide();
+                })
+                .catch(() => {
+                    alert('No se pudo actualizar el transporte. Verifica los datos.');
+                });
+            });
+        }
+
+    const formDestino = document.getElementById('formDestino');
+    if (formDestino) {
+        formDestino.addEventListener('submit', crearDestino);
+        cargarDestinos();
+    }
+
+        // Filtro de destinos
+        const filtroDestinoInput = document.getElementById('filtroDestino');
+        if (filtroDestinoInput) {
+            filtroDestinoInput.addEventListener('input', filtrarDestinos);
+        }
+
+        window._destinos = [];
+
+        // Guardar cambios del destino editado
+        const formEditarDestino = document.getElementById('formEditarDestino');
+        if (formEditarDestino) {
+            formEditarDestino.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const id = document.getElementById('editDestinoId').value;
+                const nombre = document.getElementById('editNombreDestino').value;
+                const descripcion = document.getElementById('editDescripcionDestino').value;
+                const ubicacion = document.getElementById('editUbicacionDestino').value;
+                let body = { nombre, descripcion, ubicacion };
+                fetch(`/api/destinos/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Error al actualizar destino');
+                    return res.json();
+                })
+                .then(() => {
+                    alert('Destino actualizado');
+                    cargarDestinos();
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarDestino'));
+                    if (modal) modal.hide();
+                })
+                .catch(() => {
+                    alert('No se pudo actualizar el destino. Verifica los datos.');
+                });
+            });
+        }
 
     // Filtro de usuarios
     const filtroInput = document.getElementById('filtroUsuario');
@@ -229,6 +685,17 @@ function cargarUsuarios() {
     });
 }
 
+function cargarDestinos(){
+    fetch('/api/destinos', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(destinos => {
+        window._destinos = destinos;
+        filtrarDestinos();
+    });
+}
+
 function filtrarUsuarios() {
     const cont = document.getElementById('listaUsuarios');
     const filtro = (document.getElementById('filtroUsuario')?.value || '').toLowerCase();
@@ -263,6 +730,7 @@ function mostrarModalEditarUsuario(id) {
     modal.show();
 }
 window.mostrarModalEditarUsuario = mostrarModalEditarUsuario;
+
 
 function eliminarUsuario(id) {
     if (!confirm('¿Seguro que deseas eliminar este usuario?')) return;
