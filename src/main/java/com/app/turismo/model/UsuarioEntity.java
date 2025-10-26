@@ -36,4 +36,9 @@ public class UsuarioEntity {
     @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private java.util.List<PaqueteEntity> paquetes;
+
+    // Para Spring Security: el username será el email
+    public String getUsername() {
+        return this.email;
+    }
 }

@@ -44,41 +44,34 @@ public class DestinoService {
         dto.setDescripcion(entity.getDescripcion());
         dto.setUbicacion(entity.getUbicacion());
         // Mapear actividades
-        if (entity.getActividades() != null) {
-            dto.setActividades(
-                    entity.getActividades().stream().map(act -> {
-                        ActividadDTO a = new ActividadDTO();
-                        a.setActividad_id(act.getActividad_id());
-                        a.setNombre(act.getNombre());
-                        a.setDescripcion(act.getDescripcion());
-                        a.setPrecio(act.getPrecio());
-                        return a;
-                    }).collect(Collectors.toList()));
-        }
+        dto.setActividades(entity.getActividades() != null ? entity.getActividades().stream().map(act -> {
+            ActividadDTO a = new ActividadDTO();
+            a.setActividad_id(act.getActividad_id());
+            a.setNombre(act.getNombre());
+            a.setDescripcion(act.getDescripcion());
+            a.setPrecio(act.getPrecio());
+            return a;
+        }).collect(Collectors.toList()) : new java.util.ArrayList<>());
+
         // Mapear hoteles
-        if (entity.getHoteles() != null) {
-            dto.setHoteles(
-                    entity.getHoteles().stream().map(hotel -> {
-                        HotelDTO h = new HotelDTO();
-                        h.setHotel_id(hotel.getHotel_id());
-                        h.setNombre(hotel.getNombre());
-                        h.setTarifaAdulto(hotel.getTarifaAdulto());
-                        h.setTarifaNino(hotel.getTarifaNino());
-                        return h;
-                    }).collect(Collectors.toList()));
-        }
+        dto.setHoteles(entity.getHoteles() != null ? entity.getHoteles().stream().map(hotel -> {
+            HotelDTO h = new HotelDTO();
+            h.setHotel_id(hotel.getHotel_id());
+            h.setNombre(hotel.getNombre());
+            h.setTarifaAdulto(hotel.getTarifaAdulto());
+            h.setTarifaNino(hotel.getTarifaNino());
+            return h;
+        }).collect(Collectors.toList()) : new java.util.ArrayList<>());
+
         // Mapear transportes
-        if (entity.getTransportes() != null) {
-            dto.setTransportes(
-                    entity.getTransportes().stream().map(transporte -> {
-                        TransporteDTO t = new TransporteDTO();
-                        t.setTransporte_id(transporte.getTransporte_id());
-                        t.setEmpresa(transporte.getEmpresa());
-                        t.setTipo(transporte.getTipo());
-                        t.setPrecio(transporte.getPrecio());
-                        return t;
-                    }).collect(Collectors.toList()));
-        }
+        dto.setTransportes(entity.getTransportes() != null ? entity.getTransportes().stream().map(transporte -> {
+            TransporteDTO t = new TransporteDTO();
+            t.setTransporte_id(transporte.getTransporte_id());
+            t.setEmpresa(transporte.getEmpresa());
+            t.setTipo(transporte.getTipo());
+            t.setPrecio(transporte.getPrecio());
+            return t;
+        }).collect(Collectors.toList()) : new java.util.ArrayList<>());
         // No incluir paquetes para evitar recursión
         return dto;
     }

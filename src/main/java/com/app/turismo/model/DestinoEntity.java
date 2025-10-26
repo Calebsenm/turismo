@@ -8,7 +8,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "destino")
@@ -43,4 +42,10 @@ public class DestinoEntity {
     @JsonManagedReference
     private List<TransporteEntity> transportes;
 
+    public DestinoEntity() {
+        this.actividades = new java.util.ArrayList<>();
+        this.hoteles = new java.util.ArrayList<>();
+        this.paquetes = new java.util.ArrayList<>();
+        this.transportes = new java.util.ArrayList<>();
+    }
 }
