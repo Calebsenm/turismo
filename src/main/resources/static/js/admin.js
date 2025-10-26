@@ -12,6 +12,84 @@ document.addEventListener('DOMContentLoaded', () => {
 // Lógica para manejar formularios y peticiones AJAX del panel de administración
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Usuarios
+    document.getElementById('formUsuario').addEventListener('submit', crearUsuario);
+    cargarUsuarios();
+// Registrar usuario
+function crearUsuario(e) {
+    e.preventDefault();
+    const name = document.getElementById('nombreUsuario').value;
+    const email = document.getElementById('emailUsuario').value;
+    const password = document.getElementById('passwordUsuario').value;
+    const userType = document.getElementById('tipoUsuario').value;
+    fetch('/api/usuarios', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        },
+        body: JSON.stringify({ name, email, password, userType })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert('Usuario registrado correctamente');
+        document.getElementById('formUsuario').reset();
+        cargarUsuarios();
+    });
+}
+
+// Listar usuarios
+function cargarUsuarios() {
+    fetch('/api/usuarios', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(usuarios => {
+        const cont = document.getElementById('listaUsuarios');
+        cont.innerHTML = '';
+        usuarios.forEach(u => {
+            cont.innerHTML += `
+                <div class="card mb-2 p-2">
+                    <div><b>${u.name}</b> (${u.email}) - <span class="badge bg-${u.userType === 'ADMIN' ? 'danger' : 'primary'}">${u.userType}</span></div>
+                    <button class="btn btn-sm btn-warning me-2" onclick="editarUsuario(${u.user_id})">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarUsuario(${u.user_id})">Eliminar</button>
+                </div>
+            `;
+        });
+    });
+}
+
+// Eliminar usuario
+function eliminarUsuario(id) {
+    if (!confirm('¿Seguro que deseas eliminar este usuario?')) return;
+    fetch(`/api/usuarios/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(() => {
+        alert('Usuario eliminado');
+        cargarUsuarios();
+    });
+}
+
+// Editar usuario (simple: solo tipo)
+function editarUsuario(id) {
+    const nuevoTipo = prompt('Nuevo tipo de usuario (CLIENT o ADMIN):');
+    if (!nuevoTipo || (nuevoTipo !== 'CLIENT' && nuevoTipo !== 'ADMIN')) return alert('Tipo inválido');
+    fetch(`/api/usuarios/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        },
+        body: JSON.stringify({ userType: nuevoTipo })
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert('Usuario actualizado');
+        cargarUsuarios();
+    });
+}
     // Ejemplo: cargar destinos en los selects de hotel, actividad y transporte
     cargarDestinosSelects();
 

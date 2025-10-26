@@ -45,6 +45,7 @@ public class SecurityConfig {
                                                                 "/css/**",
                                                                 "/js/**",
                                                                 "/images/**",
+                                                                "/admin-panel",
                                                                 "/api/usuarios/me")
                                                 .permitAll()
                                                 .requestMatchers("/admin-panel").hasAuthority("ROLE_ADMIN")

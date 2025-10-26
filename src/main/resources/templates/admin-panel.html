@@ -12,21 +12,22 @@
     <script>
         // Filtro JS para proteger la vista del panel admin
         if (!localStorage.getItem('jwtToken')) {
-            window.location.href = '/public/login';
+            document.body.innerHTML = '<div class="container my-5 text-center"><div class="alert alert-danger">Debes iniciar sesión como administrador para acceder al panel.</div></div>';
+            setTimeout(() => window.location.href = '/public/login', 1500);
         } else {
-            // Verificar si el usuario es admin
             fetch('/api/usuarios/me', {
                 headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
             })
             .then(res => res.json())
             .then(data => {
                 if (!data.userType || data.userType.toUpperCase() !== 'ADMIN') {
-                    alert('Acceso restringido: solo administradores pueden ver este panel.');
-                    window.location.href = '/access-denied';
+                    document.body.innerHTML = '<div class="container my-5 text-center"><div class="alert alert-warning">Acceso restringido: solo administradores pueden ver este panel.</div></div>';
+                    setTimeout(() => window.location.href = '/access-denied', 1500);
                 }
             })
             .catch(() => {
-                window.location.href = '/public/login';
+                document.body.innerHTML = '<div class="container my-5 text-center"><div class="alert alert-danger">Debes iniciar sesión como administrador para acceder al panel.</div></div>';
+                setTimeout(() => window.location.href = '/public/login', 1500);
             });
         }
     </script>
@@ -47,8 +48,38 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="transporte-tab" data-bs-toggle="tab" data-bs-target="#transporte" type="button" role="tab">Transporte</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab">Usuarios</button>
+            </li>
         </ul>
         <div class="tab-content" id="adminTabsContent">
+            <div class="tab-pane fade" id="usuarios" role="tabpanel">
+                <h4>Registrar Usuario</h4>
+                <form id="formUsuario" class="mb-4">
+                    <div class="mb-3">
+                        <label for="nombreUsuario" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombreUsuario" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailUsuario" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="emailUsuario" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordUsuario" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="passwordUsuario" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipoUsuario" class="form-label">Tipo de Usuario</label>
+                        <select id="tipoUsuario" class="form-select" required>
+                            <option value="CLIENT">Cliente</option>
+                            <option value="ADMIN">Administrador</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+                </form>
+                <h4>Lista de Usuarios</h4>
+                <div id="listaUsuarios"></div>
+            </div>
             <div class="tab-pane fade show active" id="destinos" role="tabpanel">
                 <h4>Crear Destino</h4>
                 <form id="formDestino" class="mb-4">
