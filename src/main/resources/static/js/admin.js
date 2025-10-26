@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function cargarDestinosSelects() {
     fetch('/api/destinos', {
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt') }
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
     })
         .then(res => res.json())
         .then(destinos => {
@@ -36,13 +36,14 @@ function crearDestino(e) {
     e.preventDefault();
     const nombre = document.getElementById('nombreDestino').value;
     const descripcion = document.getElementById('descripcionDestino').value;
+    const ubicacion = document.getElementById('ubicacionDestino').value;
     fetch('/api/destinos', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
         },
-        body: JSON.stringify({ nombre, descripcion })
+        body: JSON.stringify({ nombre, descripcion, ubicacion })
     })
     .then(res => res.json())
     .then(data => {
@@ -54,15 +55,63 @@ function crearDestino(e) {
 
 function crearHotel(e) {
     e.preventDefault();
-    // Implementa lógica similar para hoteles
+    const nombre = document.getElementById('nombreHotel').value;
+    const tarifaAdulto = parseFloat(document.getElementById('tarifaAdultoHotel').value);
+    const tarifaNino = parseFloat(document.getElementById('tarifaNinoHotel').value);
+    const destinoId = document.getElementById('destinoHotel').value;
+    fetch('/api/hoteles', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        },
+        body: JSON.stringify({ nombre, tarifaAdulto, tarifaNino, destino_id: destinoId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert('Hotel creado correctamente');
+        document.getElementById('formHotel').reset();
+    });
 }
 
 function crearActividad(e) {
     e.preventDefault();
-    // Implementa lógica similar para actividades
+    const nombre = document.getElementById('nombreActividad').value;
+    const descripcion = document.getElementById('descripcionActividad').value;
+    const precio = parseFloat(document.getElementById('precioActividad').value);
+    const destinoId = document.getElementById('destinoActividad').value;
+    fetch('/api/actividades', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        },
+        body: JSON.stringify({ nombre, descripcion, precio, destino_id: destinoId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert('Actividad creada correctamente');
+        document.getElementById('formActividad').reset();
+    });
 }
 
 function crearTransporte(e) {
     e.preventDefault();
-    // Implementa lógica similar para transporte
+    const tipo = document.getElementById('tipoTransporte').value;
+    const empresa = document.getElementById('empresaTransporte').value;
+    const precio = parseFloat(document.getElementById('precioTransporte').value);
+    const destinoId = document.getElementById('destinoTransporte').value;
+    fetch('/api/transportes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        },
+        body: JSON.stringify({ tipo, empresa, precio, destino_id: destinoId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert('Transporte creado correctamente');
+        document.getElementById('formTransporte').reset();
+    });
 }
