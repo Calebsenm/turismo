@@ -1,14 +1,25 @@
 package com.app.turismo.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.app.turismo.model.*;
 import com.app.turismo.repository.*;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.properties.TextAlignment;
 import com.app.turismo.dto.PaqueteDTO;
 import java.util.stream.Collectors;
 
@@ -36,6 +47,7 @@ public class PaqueteService {
     /**
      * Lista todos los paquetes registrados
      */
+    @Transactional(readOnly = true)
     public List<PaqueteDTO> listarPaquetes() {
         return paqueteRepository.findAll().stream()
                 .map(this::mapToDTO)
@@ -45,6 +57,7 @@ public class PaqueteService {
     /**
      * Busca un paquete por su ID
      */
+    @Transactional(readOnly = true)
     public Optional<PaqueteDTO> buscarPaquetePorId(Long id) {
         return paqueteRepository.findById(id)
                 .map(this::mapToDTO);
@@ -67,13 +80,20 @@ public class PaqueteService {
         dto.numNinos = entity.getNumNinos();
         dto.tipoPaquete = entity.getTipoPaquete();
         if (entity.getHoteles() != null)
-            dto.hoteles = entity.getHoteles().stream().map(HotelEntity::getHotel_id).collect(Collectors.toList());
+            dto.hoteles = entity.getHoteles().stream()
+                .filter(java.util.Objects::nonNull)
+                .map(HotelEntity::getHotel_id)
+                .collect(Collectors.toList());
         if (entity.getTransportes() != null)
-            dto.transportes = entity.getTransportes().stream().map(TransporteEntity::getTransporte_id)
-                    .collect(Collectors.toList());
+            dto.transportes = entity.getTransportes().stream()
+                .filter(java.util.Objects::nonNull)
+                .map(TransporteEntity::getTransporte_id)
+                .collect(Collectors.toList());
         if (entity.getActividades() != null)
-            dto.actividades = entity.getActividades().stream().map(ActividadEntity::getActividad_id)
-                    .collect(Collectors.toList());
+            dto.actividades = entity.getActividades().stream()
+                .filter(java.util.Objects::nonNull)
+                .map(ActividadEntity::getActividad_id)
+                .collect(Collectors.toList());
         return dto;
     }
 
@@ -230,5 +250,74 @@ public class PaqueteService {
             throw new RuntimeException("No existe un paquete con el id: " + id);
         }
         paqueteRepository.deleteById(id);
+    }
+
+    /**
+     * Genera un archivo PDF para la cotización de un paquete específico.
+     * @param paqueteId El ID del paquete a exportar.
+     * @return Un arreglo de bytes que representa el archivo PDF.
+     * @throws IOException Si ocurre un error durante la generación del PDF.
+     */
+    @Transactional(readOnly = true)
+    public byte[] generarPdfPaquete(Long paqueteId) throws IOException {
+        PaqueteEntity paquete = paqueteRepository.findById(paqueteId)
+                .orElseThrow(() -> new RuntimeException("Paquete no encontrado con id: " + paqueteId));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+        Document document = new Document(pdf, PageSize.A4);
+
+        // Formateador de moneda
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
+        currencyFormatter.setMaximumFractionDigits(0);
+
+        // Título
+        document.add(new Paragraph("Cotización de Paquete Turístico")
+                .setTextAlignment(TextAlignment.CENTER)
+                .setBold()
+                .setFontSize(20));
+
+        // Detalles del paquete
+        document.add(new Paragraph("\n"));
+        document.add(new Paragraph("Nombre del Paquete: " + paquete.getNombre()).setFontSize(14));
+        document.add(new Paragraph("Descripción: " + paquete.getDescripcion()));
+        document.add(new Paragraph("Origen: " + paquete.getOrigen()));
+        if (paquete.getDestino() != null) {
+            document.add(new Paragraph("Destino: " + paquete.getDestino().getNombre()));
+        }
+        document.add(new Paragraph("Fechas: " + paquete.getFechaInicio() + " al " + paquete.getFechaFin()));
+        document.add(new Paragraph("Viajeros: " + paquete.getNumAdultos() + " Adultos, " + paquete.getNumNinos() + " Niños"));
+
+        // Desglose de servicios
+        document.add(new Paragraph("\nServicios Incluidos:").setBold());
+
+        // Hoteles
+        if (paquete.getHoteles() != null && !paquete.getHoteles().isEmpty()) {
+            paquete.getHoteles().forEach(hotel -> 
+                document.add(new Paragraph(" - Hospedaje: " + hotel.getNombre()))
+            );
+        }
+
+        // Transportes
+        if (paquete.getTransportes() != null && !paquete.getTransportes().isEmpty()) {
+            paquete.getTransportes().forEach(transporte -> 
+                document.add(new Paragraph(" - Transporte: " + transporte.getTipo() + " (" + transporte.getEmpresa() + ")"))
+            );
+        }
+
+        // Actividades
+        if (paquete.getActividades() != null && !paquete.getActividades().isEmpty()) {
+            paquete.getActividades().forEach(actividad -> 
+                document.add(new Paragraph(" - Actividad: " + actividad.getNombre()))
+            );
+        }
+
+        // Total
+        document.add(new Paragraph("\nCosto Total del Paquete: " + currencyFormatter.format(paquete.getCostoTotal()))
+                .setTextAlignment(TextAlignment.RIGHT).setBold().setFontSize(16));
+
+        document.close();
+        return baos.toByteArray();
     }
 }
