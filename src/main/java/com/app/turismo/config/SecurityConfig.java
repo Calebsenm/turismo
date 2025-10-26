@@ -15,8 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import com.app.turismo.config.Jwt.CustomAuthenticationEntryPoint;
 import com.app.turismo.config.Jwt.JwtAuthFilter;
 
 @Configuration
@@ -24,15 +22,13 @@ import com.app.turismo.config.Jwt.JwtAuthFilter;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Value("${cors.allowed.origins}")
     private String allowedOrigins;
 
     @Autowired
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
-        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Bean
@@ -40,9 +36,25 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // Permitir acceso a todas las rutas
-                )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .requestMatchers(
+                                "/",
+                                "/v1/api/auth/**",
+                                "/error",
+                                "/public/**",
+                                "/access-denied",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**")
+                        .permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated())
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(
+                                (request, response, authException) -> response.sendRedirect("/public/login"))
+                        .accessDeniedHandler(
+                                (request, response, accessDeniedException) -> response.sendRedirect("/access-denied")));
 
         return http.build();
     }

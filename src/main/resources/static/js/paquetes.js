@@ -1,11 +1,26 @@
 const API = "http://localhost:8080/api";
 let hoteles = [], transportes = [], actividades = [];
 
-// 🌎 Cargar destinos
+// 🔐 Obtener cabeceras con autenticación
+function getAuthHeaders() {
+    const token = localStorage.getItem('jwtToken');
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
+
+// 🌎 Cargar destinos al iniciar
 async function cargarDestinos() {
     try {
-        const response = await fetch(`${API}/destinos`);
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        const response = await fetch(`${API}/destinos`, { headers: getAuthHeaders() });
+
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = "/public/login";
+            return;
+        }
+        if (!response.ok) throw new Error(`Error HTTP cargando destinos: ${response.status}`);
+
         const destinos = await response.json();
         console.log("🌎 Destinos obtenidos:", destinos);
 
@@ -23,9 +38,10 @@ async function cargarDestinos() {
     }
 }
 
-// 🔹 Cargar datos filtrados según destino
+// 🧭 Manejar cambio de destino
 document.getElementById("destino").addEventListener("change", async e => {
     const destinoId = e.target.value;
+
     if (!destinoId) {
         document.getElementById("seccion-opciones").style.display = "none";
         return;
@@ -33,42 +49,76 @@ document.getElementById("destino").addEventListener("change", async e => {
 
     document.getElementById("seccion-opciones").style.display = "block";
 
+    const fetchData = async (url) => {
+        const response = await fetch(url, { headers: getAuthHeaders() });
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = "/public/login";
+            throw new Error("Unauthorized");
+        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+    };
+
     try {
-        const response = await fetch(`${API}/destinos/${destinoId}`);
+        // Cargar datos de apoyo
+        const [hot, trans, act] = await Promise.all([
+            fetchData(`${API}/hoteles`),
+            fetchData(`${API}/transportes`),
+            fetchData(`${API}/actividades`)
+        ]);
+
+        hoteles = hot;
+        transportes = trans;
+        actividades = act;
+
+        // Cargar datos del destino específico
+        const response = await fetch(`${API}/destinos/${destinoId}`, { headers: getAuthHeaders() });
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
         const destino = await response.json();
-        console.log("Destino obtenido:", destino);
+        console.log("📍 Destino obtenido:", destino);
 
-        // Manejar datos devueltos, incluso si están vacíos
-        cargarSelect("hotel", destino.hoteles || [], "Selecciona un hotel");
-        cargarSelect("transporte", destino.transportes || [], "Selecciona un transporte");
-        cargarSelect("actividades", destino.actividades || [], "Selecciona actividades");
+        // Mostrar opciones del destino (si tiene asociadas)
+        cargarSelect("hotel", destino.hoteles || [], (h) => `${h.nombre} - Adulto: $${h.tarifaAdulto} / Niño: $${h.tarifaNino}`);
+        cargarSelect("transporte", destino.transportes || [], (t) => `${t.tipo} - ${t.empresa} ($${t.precio})`);
+        cargarSelect("actividades", destino.actividades || [], (a) => `${a.nombre} ($${a.precio})`);
 
-    } catch (err) {
-        console.error("❌ Error cargando datos del destino:", err);
-        alert("No se pudieron cargar los datos del destino. Intenta nuevamente más tarde.");
+        // Si no tiene asociadas, mostrar todas las disponibles
+        if ((!destino.hoteles || destino.hoteles.length === 0) && hoteles.length > 0) {
+            cargarSelect("hotel", hoteles, (h) => `${h.nombre} - Adulto: $${h.tarifaAdulto} / Niño: $${h.tarifaNino}`);
+        }
+        if ((!destino.transportes || destino.transportes.length === 0) && transportes.length > 0) {
+            cargarSelect("transporte", transportes, (t) => `${t.tipo} - ${t.empresa} ($${t.precio})`);
+        }
+        if ((!destino.actividades || destino.actividades.length === 0) && actividades.length > 0) {
+            cargarSelect("actividades", actividades, (a) => `${a.nombre} ($${a.precio})`);
+        }
+    } catch (error) {
+        if (error.message !== "Unauthorized") {
+            console.error("❌ Error cargando opciones del destino:", error);
+            alert("No se pudieron cargar los datos del destino. Intenta nuevamente más tarde.");
+        }
     }
 });
 
-function cargarSelect(id, lista, texto) {
-    const sel = document.getElementById(id);
-    sel.innerHTML = ""; // Limpia el select
+// 🧱 Función genérica para cargar <select>
+function cargarSelect(id, items, labelFn) {
+    const select = document.getElementById(id);
+    if (!select) return;
 
-    if (!lista || lista.length === 0) {
-        sel.innerHTML = `<option value="">No hay opciones disponibles</option>`;
-        return;
-    }
+    select.innerHTML = `<option value="">Selecciona una opción...</option>`;
 
-    sel.innerHTML = `<option value="">${texto}</option>`;
-    lista.forEach(i => {
+    items.forEach(item => {
         const option = document.createElement("option");
-        option.value = i.id || i.transporte_id || i.actividad_id || i.hotel_id; // Manejar diferentes tipos de datos
-        option.textContent = i.nombre || i.tipo || i.precio;
-        if (i.precio) option.dataset.precio = i.precio; // Agregar precio si está disponible
-        if (i.tarifaAdulto) option.dataset.tarifaAdulto = i.tarifaAdulto;
-        if (i.tarifaNino) option.dataset.tarifaNino = i.tarifaNino;
-        sel.appendChild(option);
+        option.value = item.id || item[`${id}_id`] || "";
+        option.textContent = labelFn(item);
+
+        // Guardar precios/tarifas en dataset para cálculos
+        if (item.precio) option.dataset.precio = item.precio;
+        if (item.tarifaAdulto) option.dataset.tarifaAdulto = item.tarifaAdulto;
+        if (item.tarifaNino) option.dataset.tarifaNino = item.tarifaNino;
+
+        select.appendChild(option);
     });
 }
 
@@ -90,15 +140,18 @@ function calcularTotal() {
         noches = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
     }
 
+    // Calcular total de hotel (por noches)
     if (hotel) {
         total += ((parseFloat(hotel.dataset.tarifaAdulto || 0) * adultos) +
                   (parseFloat(hotel.dataset.tarifaNino || 0) * ninos)) * noches;
     }
 
+    // Transporte (precio fijo por persona seleccionada)
     [...document.getElementById("transporte").selectedOptions].forEach(t => {
         total += parseFloat(t.dataset.precio || 0);
     });
 
+    // Actividades (precio por persona)
     [...document.getElementById("actividades").selectedOptions].forEach(a => {
         total += parseFloat(a.dataset.precio || 0) * (adultos + ninos);
     });
@@ -107,6 +160,7 @@ function calcularTotal() {
     return total;
 }
 
+// 🎧 Escuchar cambios en todos los campos relevantes
 ["hotel", "transporte", "actividades", "numAdultos", "numNinos", "fechaInicio", "fechaFin", "origen", "destino"].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -114,85 +168,6 @@ function calcularTotal() {
         el.addEventListener("input", calcularTotal);
     }
 });
-
-
-// 💾 Guardar paquete
-document.getElementById("btnGuardar").addEventListener("click", async () => {
-    try {
-        // Validar campos básicos
-        const origen = document.getElementById("origen").value;
-        const destinoId = parseInt(document.getElementById("destino").value);
-        const fechaInicio = document.getElementById("fechaInicio").value;
-        const fechaFin = document.getElementById("fechaFin").value;
-        const numAdultos = parseInt(document.getElementById("numAdultos").value) || 0;
-        const numNinos = parseInt(document.getElementById("numNinos").value) || 0;
-
-        if (!origen || !destinoId || !fechaInicio || !fechaFin) {
-            alert("Por favor completa todos los campos antes de guardar.");
-            return;
-        }
-
-        // Construir objeto paquete
-        const paquete = {
-            usuario: { user_id: 1 }, // Cambia si tienes ID dinámico de usuario
-            origen: origen,
-            destino: { destino_id: destinoId },
-            fechaInicio: fechaInicio,
-            fechaFin: fechaFin,
-            numAdultos: numAdultos,
-            numNinos: numNinos,
-            costoTotal: calcularTotal(),
-            nombre: "Paquete personalizado",
-            descripcion: "Cotización creada por el cliente",
-            hoteles: [...document.getElementById("hotel").selectedOptions].map(h => ({ hotel_id: parseInt(h.value) })),
-            transportes: [...document.getElementById("transporte").selectedOptions].map(t => ({ transporte_id: parseInt(t.value) })),
-            actividades: [...document.getElementById("actividades").selectedOptions].map(a => ({ actividad_id: parseInt(a.value) }))
-        };
-
-        console.log("Enviando paquete:", paquete);
-
-        // Enviar al backend
-        const res = await fetch(`${API}/paquetes`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(paquete)
-        });
-
-        const mensaje = document.getElementById("mensaje");
-        if (res.ok) {
-            const data = await res.json();
-            mensaje.textContent = "✅ Paquete guardado con éxito.";
-            mensaje.className = "text-success";
-            console.log("Paquete guardado:", data);
-            // Mostrar popup de confirmación
-            alert("✅ Paquete guardado con éxito.");
-            // Limpiar campos manualmente
-            document.getElementById("origen").value = "";
-            document.getElementById("destino").value = "";
-            document.getElementById("fechaInicio").value = "";
-            document.getElementById("fechaFin").value = "";
-            document.getElementById("numAdultos").value = "";
-            document.getElementById("numNinos").value = "";
-            document.getElementById("hotel").selectedIndex = 0;
-            document.getElementById("transporte").selectedIndex = 0;
-            document.getElementById("actividades").selectedIndex = 0;
-            document.getElementById("seccion-opciones").style.display = "none";
-            document.getElementById("total").textContent = "0";
-        } else {
-            const errorData = await res.json().catch(() => ({}));
-            mensaje.textContent = `❌ Error al guardar el paquete: ${errorData.message || res.status}`;
-            mensaje.className = "text-danger";
-            console.error("Error al guardar paquete:", errorData);
-        }
-    } catch (err) {
-        const mensaje = document.getElementById("mensaje");
-        mensaje.textContent = `❌ Error al guardar el paquete: ${err.message}`;
-        mensaje.className = "text-danger";
-        console.error("Excepción al guardar paquete:", err);
-    }
-});
-
-
 
 // 🎒 Paquetes prearmados
 function cargarPaquetesPrearmados() {
@@ -213,7 +188,7 @@ function cargarPaquetesPrearmados() {
     `);
 }
 
-// Inicialización segura cuando el DOM está listo
+// 🚀 Inicialización
 document.addEventListener("DOMContentLoaded", function() {
     cargarDestinos();
     cargarPaquetesPrearmados();
