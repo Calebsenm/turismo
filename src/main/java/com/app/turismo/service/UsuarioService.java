@@ -39,7 +39,10 @@ public class UsuarioService {
     public Optional<UsuarioEntity> actualizarUsuario(Long id, UsuarioEntity detalles) {
         return usuarioRepository.findById(id).map(usuario -> {
             usuario.setEmail(detalles.getEmail());
-            usuario.setPassword(detalles.getPassword());
+            // Solo actualiza la contraseña si viene y no está vacía
+            if (detalles.getPassword() != null && !detalles.getPassword().isEmpty()) {
+                usuario.setPassword(detalles.getPassword());
+            }
             usuario.setName(detalles.getName());
             usuario.setUserType(detalles.getUserType());
             return usuarioRepository.save(usuario);

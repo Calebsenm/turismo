@@ -53,32 +53,76 @@
             </li>
         </ul>
         <div class="tab-content" id="adminTabsContent">
+                        <!-- Modal para editar usuario -->
+                        <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-labelledby="modalEditarUsuarioLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalEditarUsuarioLabel">Editar Usuario</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                    </div>
+                                    <form id="formEditarUsuario">
+                                        <div class="modal-body">
+                                            <input type="hidden" id="editUserId">
+                                            <div class="mb-3">
+                                                <label for="editNombreUsuario" class="form-label">Nombre</label>
+                                                <input type="text" class="form-control" id="editNombreUsuario" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="editEmailUsuario" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="editEmailUsuario" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="editTipoUsuario" class="form-label">Tipo de Usuario</label>
+                                                <select id="editTipoUsuario" class="form-select" required>
+                                                    <option value="CLIENT">Cliente</option>
+                                                    <option value="ADMIN">Administrador</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
             <div class="tab-pane fade" id="usuarios" role="tabpanel">
-                <h4>Registrar Usuario</h4>
-                <form id="formUsuario" class="mb-4">
-                    <div class="mb-3">
-                        <label for="nombreUsuario" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="nombreUsuario" required>
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h4>Registrar Usuario</h4>
+                        <form id="formUsuario" class="mb-4">
+                            <div class="mb-3">
+                                <label for="nombreUsuario" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombreUsuario" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="emailUsuario" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="emailUsuario" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="passwordUsuario" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="passwordUsuario" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tipoUsuario" class="form-label">Tipo de Usuario</label>
+                                <select id="tipoUsuario" class="form-select" required>
+                                    <option value="CLIENT">Cliente</option>
+                                    <option value="ADMIN">Administrador</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Registrar Usuario</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="emailUsuario" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="emailUsuario" required>
+                    <div class="col-md-6">
+                        <h4>Lista de Usuarios</h4>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="filtroUsuario" placeholder="Buscar usuario por nombre o email...">
+                        </div>
+                        <div id="listaUsuarios"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="passwordUsuario" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="passwordUsuario" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tipoUsuario" class="form-label">Tipo de Usuario</label>
-                        <select id="tipoUsuario" class="form-select" required>
-                            <option value="CLIENT">Cliente</option>
-                            <option value="ADMIN">Administrador</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Registrar Usuario</button>
-                </form>
-                <h4>Lista de Usuarios</h4>
-                <div id="listaUsuarios"></div>
+                </div>
             </div>
             <div class="tab-pane fade show active" id="destinos" role="tabpanel">
                 <h4>Crear Destino</h4>
