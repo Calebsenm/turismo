@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -61,5 +62,24 @@ public class UsuarioController {
         if (eliminado)
             return ResponseEntity.noContent().build();
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null
+                || !(authentication.getPrincipal() instanceof com.app.turismo.model.user.CustomUserDetails)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        com.app.turismo.model.user.CustomUserDetails userDetails = (com.app.turismo.model.user.CustomUserDetails) authentication
+                .getPrincipal();
+        UsuarioEntity usuario = userDetails.getUsuario();
+        // Devolver solo los datos necesarios para el frontend
+        return ResponseEntity.ok(new java.util.HashMap<String, Object>() {
+            {
+                put("email", usuario.getEmail());
+                put("name", usuario.getName());
+                put("userType", usuario.getUserType());
+            }
+        });
     }
 }

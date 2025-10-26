@@ -11,6 +11,9 @@
 </head>
 
 <body>
+    <!-- Fragmento de menú reutilizable -->
+    <div th:replace="fragments/menu :: menu"></div>
+
 <div class="container my-5">
     <h2 class="text-center mb-5">🌴 Crea tu paquete turístico ideal</h2>
 
@@ -95,5 +98,8 @@
 </div>
 
 <script th:src="@{/js/paquetes.js}"></script>
+
+    <!-- Fragmento de footer reutilizable -->
+    <div th:replace="fragments/footer :: footer"></div>
 </body>
 </html>

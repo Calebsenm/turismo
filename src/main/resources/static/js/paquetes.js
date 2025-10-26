@@ -78,21 +78,10 @@ document.getElementById("destino").addEventListener("change", async e => {
         const destino = await response.json();
         console.log("📍 Destino obtenido:", destino);
 
-        // Mostrar opciones del destino (si tiene asociadas)
+        // Mostrar solo los elementos propios del destino seleccionado
         cargarSelect("hotel", destino.hoteles || [], (h) => `${h.nombre} - Adulto: $${h.tarifaAdulto} / Niño: $${h.tarifaNino}`);
         cargarSelect("transporte", destino.transportes || [], (t) => `${t.tipo} - ${t.empresa} ($${t.precio})`);
         cargarSelect("actividades", destino.actividades || [], (a) => `${a.nombre} ($${a.precio})`);
-
-        // Si no tiene asociadas, mostrar todas las disponibles
-        if ((!destino.hoteles || destino.hoteles.length === 0) && hoteles.length > 0) {
-            cargarSelect("hotel", hoteles, (h) => `${h.nombre} - Adulto: $${h.tarifaAdulto} / Niño: $${h.tarifaNino}`);
-        }
-        if ((!destino.transportes || destino.transportes.length === 0) && transportes.length > 0) {
-            cargarSelect("transporte", transportes, (t) => `${t.tipo} - ${t.empresa} ($${t.precio})`);
-        }
-        if ((!destino.actividades || destino.actividades.length === 0) && actividades.length > 0) {
-            cargarSelect("actividades", actividades, (a) => `${a.nombre} ($${a.precio})`);
-        }
     } catch (error) {
         if (error.message !== "Unauthorized") {
             console.error("❌ Error cargando opciones del destino:", error);

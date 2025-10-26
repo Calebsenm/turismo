@@ -10,20 +10,14 @@
 </head>
 <body class="container mt-4">
 
-    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-            <span class="fs-4">Mi App de Turismo</span>
-        </a>
-
-        <ul class="nav nav-pills">
-            <li class="nav-item"><a th:href="@{/public/home}" class="nav-link active" aria-current="page">Inicio</a></li>
-            <li class="nav-item"><a th:href="@{/public/armar-paquete}" class="nav-link">Armar Paquete</a></li>
-            <li class="nav-item"><button id="logout-button" class="btn btn-danger ms-2">Cerrar Sesión</button></li>
-        </ul>
-    </header>
+    <!-- Fragmento de menú reutilizable -->
+    <div th:replace="fragments/menu :: menu"></div>
 
     <h1>¡Hola, bienvenido!</h1>
     <p>Esta es tu página de inicio. Desde aquí puedes navegar a otras secciones de la aplicación.</p>
+
+    <!-- Fragmento de footer reutilizable -->
+    <div th:replace="fragments/footer :: footer"></div>
 
     <script th:src="@{/js/main.js}"></script>
 </body>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <script th:src="@{/js/auth-guard.js}"></script>
+</head>
+<body>
+    <script>
+        // Filtro JS para proteger la vista del panel admin
+        if (!localStorage.getItem('jwtToken')) {
+            window.location.href = '/public/login';
+        } else {
+            // Verificar si el usuario es admin
+            fetch('/api/usuarios/me', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.userType || data.userType.toUpperCase() !== 'ADMIN') {
+                    alert('Acceso restringido: solo administradores pueden ver este panel.');
+                    window.location.href = '/access-denied';
+                }
+            })
+            .catch(() => {
+                window.location.href = '/public/login';
+            });
+        }
+    </script>
+    <div th:replace="fragments/menu :: menu"></div>
+
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Panel de Administración</h2>
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="destinos-tab" data-bs-toggle="tab" data-bs-target="#destinos" type="button" role="tab">Destinos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="hoteles-tab" data-bs-toggle="tab" data-bs-target="#hoteles" type="button" role="tab">Hoteles</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="actividades-tab" data-bs-toggle="tab" data-bs-target="#actividades" type="button" role="tab">Actividades</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="transporte-tab" data-bs-toggle="tab" data-bs-target="#transporte" type="button" role="tab">Transporte</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="adminTabsContent">
+            <div class="tab-pane fade show active" id="destinos" role="tabpanel">
+                <h4>Crear Destino</h4>
+                <form id="formDestino" class="mb-4">
+                    <div class="mb-3">
+                        <label for="nombreDestino" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombreDestino" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcionDestino" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcionDestino" rows="2" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Destino</button>
+                </form>
+                <div id="listaDestinos"></div>
+            </div>
+            <div class="tab-pane fade" id="hoteles" role="tabpanel">
+                <h4>Crear Hotel</h4>
+                <form id="formHotel" class="mb-4">
+                    <div class="mb-3">
+                        <label for="nombreHotel" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombreHotel" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="destinoHotel" class="form-label">Destino</label>
+                        <select id="destinoHotel" class="form-select" required></select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Hotel</button>
+                </form>
+                <div id="listaHoteles"></div>
+            </div>
+            <div class="tab-pane fade" id="actividades" role="tabpanel">
+                <h4>Crear Actividad</h4>
+                <form id="formActividad" class="mb-4">
+                    <div class="mb-3">
+                        <label for="nombreActividad" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombreActividad" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="destinoActividad" class="form-label">Destino</label>
+                        <select id="destinoActividad" class="form-select" required></select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Actividad</button>
+                </form>
+                <div id="listaActividades"></div>
+            </div>
+            <div class="tab-pane fade" id="transporte" role="tabpanel">
+                <h4>Crear Transporte</h4>
+                <form id="formTransporte" class="mb-4">
+                    <div class="mb-3">
+                        <label for="tipoTransporte" class="form-label">Tipo</label>
+                        <input type="text" class="form-control" id="tipoTransporte" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="destinoTransporte" class="form-label">Destino</label>
+                        <select id="destinoTransporte" class="form-select" required></select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Transporte</button>
+                </form>
+                <div id="listaTransporte"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

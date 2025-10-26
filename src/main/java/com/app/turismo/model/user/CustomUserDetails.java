@@ -15,7 +15,10 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Si tienes roles, retorna la lista de GrantedAuthority correspondiente
+        if (usuario.getUserType() != null && usuario.getUserType().equalsIgnoreCase("ADMIN")) {
+            return Collections.singletonList(
+                    (GrantedAuthority) () -> "ROLE_ADMIN");
+        }
         return Collections.emptyList();
     }
 
