@@ -31,11 +31,20 @@ public class TransporteController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST - Crear transporte
+    // POST - Crear transporte usando DTO
     @PostMapping
-    public ResponseEntity<TransporteEntity> crearTransporte(@RequestBody TransporteEntity transporte) {
-        TransporteEntity nuevoTransporte = transporteService.crearTransporte(transporte);
-        return new ResponseEntity<>(nuevoTransporte, HttpStatus.CREATED);
+    public ResponseEntity<?> crearTransporte(
+            @RequestBody com.app.turismo.dto.TransporteDTO transporteDTO) {
+        try {
+            System.out.println(
+                    "Datos recibidos: " + transporteDTO.getTipo() + ", destinoId: " + transporteDTO.getDestinoId());
+            TransporteEntity nuevoTransporte = transporteService.crearTransporteDesdeDTO(transporteDTO);
+            return new ResponseEntity<>(nuevoTransporte, HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.err.println("Error al crear transporte: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
     // PUT - Actualizar transporte existente

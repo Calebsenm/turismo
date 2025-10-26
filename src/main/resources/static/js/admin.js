@@ -15,7 +15,15 @@ function crearUsuario(e) {
     const name = document.getElementById('nombreUsuario').value;
     const email = document.getElementById('emailUsuario').value;
     const password = document.getElementById('passwordUsuario').value;
-    const userType = document.getElementById('tipoUsuario').value;
+        const destinoId = document.getElementById('destinoHotel').value;
+    
+        // Validación de datos
+        console.log('Datos a enviar:', {nombre, tarifaAdulto, tarifaNino, destinoId: destinoId});
+    
+        if (!nombre || !tarifaAdulto || !tarifaNino || !destinoId || destinoId === 'undefined') {
+            alert('Por favor complete todos los campos y seleccione un destino válido');
+            return;
+        }
     fetch('/api/usuarios', {
         method: 'POST',
         headers: {
@@ -173,6 +181,7 @@ function cargarDestinosSelects() {
     })
         .then(res => res.json())
         .then(destinos => {
+            console.log('Destinos cargados:', destinos);
             const selects = [
                 document.getElementById('destinoHotel'),
                 document.getElementById('destinoActividad'),
@@ -181,7 +190,7 @@ function cargarDestinosSelects() {
             selects.forEach(select => {
                 select.innerHTML = '<option value="">Selecciona destino...</option>';
                 destinos.forEach(d => {
-                    select.innerHTML += `<option value="${d.id}">${d.nombre}</option>`;
+                    select.innerHTML += `<option value="${d.destino_id}">${d.nombre}</option>`;
                 });
             });
         });
@@ -274,18 +283,42 @@ function crearHotel(e) {
     const tarifaAdulto = parseFloat(document.getElementById('tarifaAdultoHotel').value);
     const tarifaNino = parseFloat(document.getElementById('tarifaNinoHotel').value);
     const destinoId = document.getElementById('destinoHotel').value;
+    
+    // Validación de datos
+    console.log('Datos a enviar:', {nombre, tarifaAdulto, tarifaNino, destinoId: destinoId});
+    
+    if (!nombre || !tarifaAdulto || !tarifaNino || !destinoId) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+    
+    const hotelPayload = { nombre, tarifaAdulto, tarifaNino, destinoId: destinoId };
+    console.log('JSON enviado a /api/hoteles:', JSON.stringify(hotelPayload));
     fetch('/api/hoteles', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
         },
-        body: JSON.stringify({ nombre, tarifaAdulto, tarifaNino, destino_id: destinoId })
+        body: JSON.stringify(hotelPayload)
     })
-    .then(res => res.json())
+    .then(res => {
+        console.log('Respuesta status:', res.status);
+        if (!res.ok) {
+            return res.text().then(text => {
+                throw new Error(`HTTP ${res.status}: ${text}`);
+            });
+        }
+        return res.json();
+    })
     .then(data => {
+        console.log('Hotel creado:', data);
         alert('Hotel creado correctamente');
         document.getElementById('formHotel').reset();
+    })
+    .catch(error => {
+        console.error('Error al crear hotel:', error);
+        alert('Error al crear hotel: ' + error.message);
     });
 }
 
@@ -295,18 +328,36 @@ function crearActividad(e) {
     const descripcion = document.getElementById('descripcionActividad').value;
     const precio = parseFloat(document.getElementById('precioActividad').value);
     const destinoId = document.getElementById('destinoActividad').value;
+    console.log('Datos a enviar (actividad):', {nombre, descripcion, precio, destinoId});
+    if (!nombre || !descripcion || !precio || !destinoId || destinoId === 'undefined') {
+        alert('Por favor complete todos los campos y seleccione un destino válido');
+        return;
+    }
+    const actividadPayload = { nombre, descripcion, precio, destinoId };
+    console.log('JSON enviado a /api/actividades:', JSON.stringify(actividadPayload));
     fetch('/api/actividades', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
         },
-        body: JSON.stringify({ nombre, descripcion, precio, destino_id: destinoId })
+        body: JSON.stringify(actividadPayload)
     })
-    .then(res => res.json())
+    .then(res => {
+        console.log('Respuesta status:', res.status);
+        if (!res.ok) {
+            return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text}`); });
+        }
+        return res.json();
+    })
     .then(data => {
+        console.log('Actividad creada:', data);
         alert('Actividad creada correctamente');
         document.getElementById('formActividad').reset();
+    })
+    .catch(error => {
+        console.error('Error al crear actividad:', error);
+        alert('Error al crear actividad: ' + error.message);
     });
 }
 
@@ -316,18 +367,36 @@ function crearTransporte(e) {
     const empresa = document.getElementById('empresaTransporte').value;
     const precio = parseFloat(document.getElementById('precioTransporte').value);
     const destinoId = document.getElementById('destinoTransporte').value;
+    console.log('Datos a enviar (transporte):', {tipo, empresa, precio, destinoId});
+    if (!tipo || !empresa || !precio || !destinoId || destinoId === 'undefined') {
+        alert('Por favor complete todos los campos y seleccione un destino válido');
+        return;
+    }
+    const transportePayload = { tipo, empresa, precio, destinoId };
+    console.log('JSON enviado a /api/transportes:', JSON.stringify(transportePayload));
     fetch('/api/transportes', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
         },
-        body: JSON.stringify({ tipo, empresa, precio, destino_id: destinoId })
+        body: JSON.stringify(transportePayload)
     })
-    .then(res => res.json())
+    .then(res => {
+        console.log('Respuesta status:', res.status);
+        if (!res.ok) {
+            return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text}`); });
+        }
+        return res.json();
+    })
     .then(data => {
+        console.log('Transporte creado:', data);
         alert('Transporte creado correctamente');
         document.getElementById('formTransporte').reset();
+    })
+    .catch(error => {
+        console.error('Error al crear transporte:', error);
+        alert('Error al crear transporte: ' + error.message);
     });
 }
 

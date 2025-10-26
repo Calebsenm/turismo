@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.app.turismo.dto.HotelDTO;
 import com.app.turismo.model.HotelEntity;
 import com.app.turismo.service.HotelService;
 
@@ -31,11 +32,19 @@ public class HotelController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST - Registrar nuevo hotel
+    // POST - Registrar nuevo hotel usando DTO
     @PostMapping
-    public ResponseEntity<HotelEntity> crearHotel(@RequestBody HotelEntity hotel) {
-        HotelEntity nuevoHotel = hotelService.guardarHotel(hotel);
-        return ResponseEntity.ok(nuevoHotel);
+    public ResponseEntity<?> crearHotel(@RequestBody HotelDTO hotelDTO) {
+        try {
+            System.out
+                    .println("Datos recibidos: " + hotelDTO.getNombre() + ", destinoId: " + hotelDTO.getDestinoId());
+            HotelEntity nuevoHotel = hotelService.crearHotelDesdeDTO(hotelDTO);
+            return ResponseEntity.ok(nuevoHotel);
+        } catch (Exception e) {
+            System.err.println("Error al crear hotel: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
     // PUT - Modificar hotel existente
