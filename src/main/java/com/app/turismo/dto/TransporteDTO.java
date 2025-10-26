@@ -5,6 +5,7 @@ public class TransporteDTO {
     private String empresa;
     private String tipo;
     private Double precio;
+    private Long destinoId; // Campo para recibir el ID del destino desde el frontend
 
     // Getters y setters
     public Long getTransporte_id() {
@@ -37,5 +38,13 @@ public class TransporteDTO {
 
     public void setPrecio(Double precio) {
         this.precio = precio;
+    }
+
+    public Long getDestinoId() {
+        return destinoId;
+    }
+
+    public void setDestinoId(Long destinoId) {
+        this.destinoId = destinoId;
     }
 }

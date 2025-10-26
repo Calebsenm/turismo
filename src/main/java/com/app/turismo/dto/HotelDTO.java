@@ -5,6 +5,7 @@ public class HotelDTO {
     private String nombre;
     private Double tarifaAdulto;
     private Double tarifaNino;
+    private Long destinoId; // Campo para recibir el ID del destino desde el frontend
 
     // Getters y setters
     public Long getHotel_id() {
@@ -37,5 +38,13 @@ public class HotelDTO {
 
     public void setTarifaNino(Double tarifaNino) {
         this.tarifaNino = tarifaNino;
+    }
+
+    public Long getDestinoId() {
+        return destinoId;
+    }
+
+    public void setDestinoId(Long destinoId) {
+        this.destinoId = destinoId;
     }
 }

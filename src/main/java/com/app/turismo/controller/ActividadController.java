@@ -31,11 +31,19 @@ public class ActividadController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST - Crear nueva actividad
+    // POST - Crear nueva actividad usando DTO
     @PostMapping
-    public ResponseEntity<ActividadEntity> crearActividad(@RequestBody ActividadEntity actividad) {
-        ActividadEntity nueva = actividadService.crearActividad(actividad);
-        return new ResponseEntity<>(nueva, HttpStatus.CREATED);
+    public ResponseEntity<?> crearActividad(@RequestBody com.app.turismo.dto.ActividadDTO actividadDTO) {
+        try {
+            System.out.println(
+                    "Datos recibidos: " + actividadDTO.getNombre() + ", destinoId: " + actividadDTO.getDestinoId());
+            ActividadEntity nueva = actividadService.crearActividadDesdeDTO(actividadDTO);
+            return new ResponseEntity<>(nueva, HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.err.println("Error al crear actividad: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
     // PUT - Actualizar actividad existente
