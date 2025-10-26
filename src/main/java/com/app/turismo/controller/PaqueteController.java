@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import com.app.turismo.model.PaqueteEntity;
 import com.app.turismo.dto.PaqueteDTO;
 import com.app.turismo.service.PaqueteService;
+import java.io.IOException;
+import com.itextpdf.styledxmlparser.css.media.MediaType;
 
 @RestController
 @RequestMapping("/api/paquetes")
@@ -61,6 +64,27 @@ public class PaqueteController {
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+     @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> descargarCotizacionPdf(@PathVariable Long id) {
+        try {
+            byte[] pdfBytes = paqueteService.generarPdfPaquete(id);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+            // El nombre del archivo que se descargará
+            headers.setContentDispositionFormData("attachment", "cotizacion-paquete-" + id + ".pdf");
+            headers.setContentLength(pdfBytes.length);
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            // Manejo de error si falla la generación del PDF
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (RuntimeException e) {
+            // Manejo de error si el paquete no se encuentra
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

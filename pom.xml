@@ -89,6 +89,22 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>itextkernel</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>itextlayout</artifactId>
+    <version>7.2.5</version>
+</dependency>
+
+
+
+        
     </dependencies>
 
     <build>
