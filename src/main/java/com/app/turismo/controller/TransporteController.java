@@ -50,10 +50,17 @@ public class TransporteController {
     // PUT - Actualizar transporte existente
     @PutMapping("/{id}")
     public ResponseEntity<TransporteEntity> actualizarTransporte(@PathVariable Long id,
-            @RequestBody TransporteEntity transporteDetalles) {
-        return transporteService.actualizarTransporte(id, transporteDetalles)
-                .map(actualizado -> new ResponseEntity<>(actualizado, HttpStatus.OK))
-                .orElse(ResponseEntity.notFound().build());
+            @RequestBody com.app.turismo.dto.TransporteDTO transporteDTO) {
+        try {
+            TransporteEntity actualizado = transporteService.actualizarTransporteDesdeDTO(id, transporteDTO);
+            if (actualizado != null) {
+                return new ResponseEntity<>(actualizado, HttpStatus.OK);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     // DELETE - Eliminar transporte

@@ -47,11 +47,15 @@ public class HotelController {
         }
     }
 
-    // PUT - Modificar hotel existente
+    // PUT - Modificar hotel existente usando DTO
     @PutMapping("/{id}")
-    public ResponseEntity<HotelEntity> actualizarHotel(@PathVariable Long id, @RequestBody HotelEntity hotel) {
-        HotelEntity actualizado = hotelService.actualizarHotel(id, hotel);
-        return ResponseEntity.ok(actualizado);
+    public ResponseEntity<?> actualizarHotel(@PathVariable Long id, @RequestBody HotelDTO hotelDTO) {
+        try {
+            HotelEntity actualizado = hotelService.actualizarHotelDesdeDTO(id, hotelDTO);
+            return ResponseEntity.ok(actualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
     // DELETE - Eliminar hotel

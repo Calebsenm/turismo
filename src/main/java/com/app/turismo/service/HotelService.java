@@ -14,7 +14,6 @@ import com.app.turismo.repository.HotelRepository;
 
 @Service
 public class HotelService {
-
     @Autowired
     private HotelRepository hotelRepository;
 
@@ -66,17 +65,23 @@ public class HotelService {
         return hotelGuardado;
     }
 
-    // Actualizar hotel existente
-    public HotelEntity actualizarHotel(Long id, HotelEntity hotelActualizado) {
-        return hotelRepository.findById(id)
-                .map(hotel -> {
-                    hotel.setNombre(hotelActualizado.getNombre());
-                    hotel.setTarifaAdulto(hotelActualizado.getTarifaAdulto());
-                    hotel.setTarifaNino(hotelActualizado.getTarifaNino());
-                    hotel.setDestino(hotelActualizado.getDestino());
-                    return hotelRepository.save(hotel);
-                })
+    // Actualizar hotel existente desde DTO
+    public HotelEntity actualizarHotelDesdeDTO(Long id, HotelDTO hotelDTO) {
+        HotelEntity hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Hotel no encontrado con id: " + id));
+
+        hotel.setNombre(hotelDTO.getNombre());
+        hotel.setTarifaAdulto(hotelDTO.getTarifaAdulto());
+        hotel.setTarifaNino(hotelDTO.getTarifaNino());
+
+        if (hotelDTO.getDestinoId() == null) {
+            throw new RuntimeException("destinoId no puede ser null");
+        }
+        DestinoEntity destino = destinoRepository.findById(hotelDTO.getDestinoId())
+                .orElseThrow(() -> new RuntimeException("Destino no encontrado con id: " + hotelDTO.getDestinoId()));
+        hotel.setDestino(destino);
+
+        return hotelRepository.save(hotel);
     }
 
     // Eliminar hotel
@@ -86,4 +91,5 @@ public class HotelService {
         }
         hotelRepository.deleteById(id);
     }
+
 }

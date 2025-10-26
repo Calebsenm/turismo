@@ -154,13 +154,24 @@ function mostrarModalEditarHotel(id) {
     document.getElementById('editNombreHotel').value = hotel.nombre;
     document.getElementById('editTarifaAdultoHotel').value = hotel.tarifaAdulto;
     document.getElementById('editTarifaNinoHotel').value = hotel.tarifaNino;
-    // Cargar destinos en el select
-    cargarDestinosSelectEdit('editDestinoHotel', hotel.destino?.destino_id);
-    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarHotel'));
-    if (!modal) {
-        modal = new bootstrap.Modal(document.getElementById('modalEditarHotel'));
-    }
-    modal.show();
+    // Cargar destinos en el select y mostrar el modal después
+    fetch('/api/destinos', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(destinos => {
+        const select = document.getElementById('editDestinoHotel');
+        if (!select) return;
+        select.innerHTML = '<option value="">Selecciona destino...</option>';
+        destinos.forEach(d => {
+            select.innerHTML += `<option value="${d.destino_id}" ${d.destino_id === hotel.destino?.destino_id ? 'selected' : ''}>${d.nombre}</option>`;
+        });
+        let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarHotel'));
+        if (!modal) {
+            modal = new bootstrap.Modal(document.getElementById('modalEditarHotel'));
+        }
+        modal.show();
+    });
 }
 window.mostrarModalEditarHotel = mostrarModalEditarHotel;
 
@@ -282,12 +293,31 @@ function mostrarModalEditarTransporte(id) {
     document.getElementById('editTipoTransporte').value = transporte.tipo;
     document.getElementById('editEmpresaTransporte').value = transporte.empresa;
     document.getElementById('editPrecioTransporte').value = transporte.precio;
-    cargarDestinosSelectEdit('editDestinoTransporte', transporte.destino?.destino_id);
-    let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarTransporte'));
-    if (!modal) {
-        modal = new bootstrap.Modal(document.getElementById('modalEditarTransporte'));
-    }
-    modal.show();
+    // Cargar destinos en el select y mostrar el modal después
+    fetch('/api/destinos', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+    })
+    .then(res => res.json())
+    .then(destinos => {
+        const select = document.getElementById('editDestinoTransporte');
+        if (!select) return;
+        select.innerHTML = '<option value="">Selecciona destino...</option>';
+        destinos.forEach(d => {
+            const isSelected = String(d.destino_id) === String(transporte.destino?.destino_id);
+            select.innerHTML += `<option value="${d.destino_id}" ${isSelected ? 'selected' : ''}>${d.nombre}</option>`;
+        });
+        // Forzar el valor seleccionado en el select (por si el browser ignora el atributo selected)
+        if (transporte.destino?.destino_id) {
+            select.value = String(transporte.destino.destino_id);
+        }
+        // Log para depuración
+        console.log('Valor destino seleccionado en popup transporte:', select.value);
+        let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarTransporte'));
+        if (!modal) {
+            modal = new bootstrap.Modal(document.getElementById('modalEditarTransporte'));
+        }
+        modal.show();
+    });
 }
 window.mostrarModalEditarTransporte = mostrarModalEditarTransporte;
 
@@ -502,7 +532,12 @@ function eliminarDestino(id) {
                 const empresa = document.getElementById('editEmpresaTransporte').value;
                 const precio = parseFloat(document.getElementById('editPrecioTransporte').value);
                 const destinoId = document.getElementById('editDestinoTransporte').value;
+                if (!destinoId || destinoId === '' || destinoId === 'undefined') {
+                    alert('Por favor selecciona un destino válido');
+                    return;
+                }
                 let body = { tipo, empresa, precio, destinoId };
+                console.log('JSON enviado a /api/transportes:', JSON.stringify(body));
                 fetch(`/api/transportes/${id}`, {
                     method: 'PUT',
                     headers: {

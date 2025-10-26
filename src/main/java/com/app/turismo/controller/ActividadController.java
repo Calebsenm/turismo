@@ -46,13 +46,16 @@ public class ActividadController {
         }
     }
 
-    // PUT - Actualizar actividad existente
+    // PUT - Actualizar actividad existente usando DTO
     @PutMapping("/{id}")
-    public ResponseEntity<ActividadEntity> actualizarActividad(@PathVariable Long id,
-            @RequestBody ActividadEntity detalles) {
-        return actividadService.actualizarActividad(id, detalles)
-                .map(actualizada -> new ResponseEntity<>(actualizada, HttpStatus.OK))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> actualizarActividad(@PathVariable Long id,
+            @RequestBody com.app.turismo.dto.ActividadDTO actividadDTO) {
+        try {
+            ActividadEntity actualizada = actividadService.actualizarActividadDesdeDTO(id, actividadDTO);
+            return ResponseEntity.ok(actualizada);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
     // DELETE - Eliminar actividad

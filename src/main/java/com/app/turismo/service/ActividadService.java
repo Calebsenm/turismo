@@ -52,15 +52,24 @@ public class ActividadService {
         return actividadRepository.save(actividad);
     }
 
-    // Actualizar actividad
-    public Optional<ActividadEntity> actualizarActividad(Long id, ActividadEntity detalles) {
-        return actividadRepository.findById(id).map(actividad -> {
-            actividad.setNombre(detalles.getNombre());
-            actividad.setDescripcion(detalles.getDescripcion());
-            actividad.setPrecio(detalles.getPrecio());
-            actividad.setDestino(detalles.getDestino());
-            return actividadRepository.save(actividad);
-        });
+    // Actualizar actividad desde DTO
+    public ActividadEntity actualizarActividadDesdeDTO(Long id, ActividadDTO actividadDTO) {
+        ActividadEntity actividad = actividadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Actividad no encontrada con id: " + id));
+
+        actividad.setNombre(actividadDTO.getNombre());
+        actividad.setDescripcion(actividadDTO.getDescripcion());
+        actividad.setPrecio(actividadDTO.getPrecio());
+
+        if (actividadDTO.getDestinoId() == null) {
+            throw new RuntimeException("destinoId no puede ser null");
+        }
+        DestinoEntity destino = destinoRepository.findById(actividadDTO.getDestinoId())
+                .orElseThrow(
+                        () -> new RuntimeException("Destino no encontrado con id: " + actividadDTO.getDestinoId()));
+        actividad.setDestino(destino);
+
+        return actividadRepository.save(actividad);
     }
 
     // Eliminar actividad

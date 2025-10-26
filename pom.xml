@@ -91,6 +91,8 @@
         </dependency>
 
 
+
+<!--
 <dependency>
     <groupId>com.itextpdf</groupId>
     <artifactId>itextkernel</artifactId>
@@ -101,6 +103,7 @@
     <artifactId>itextlayout</artifactId>
     <version>7.2.5</version>
 </dependency>
+-->
 
 
 

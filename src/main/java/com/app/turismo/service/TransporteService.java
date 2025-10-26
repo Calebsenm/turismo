@@ -53,14 +53,21 @@ public class TransporteService {
     }
 
     // Actualizar transporte existente
-    public Optional<TransporteEntity> actualizarTransporte(Long id, TransporteEntity transporteDetalles) {
-        return transporteRepository.findById(id).map(transporte -> {
-            transporte.setTipo(transporteDetalles.getTipo());
-            transporte.setEmpresa(transporteDetalles.getEmpresa());
-            transporte.setPrecio(transporteDetalles.getPrecio());
-            transporte.setDestino(transporteDetalles.getDestino());
+    public TransporteEntity actualizarTransporteDesdeDTO(Long id, com.app.turismo.dto.TransporteDTO transporteDTO) {
+        Optional<TransporteEntity> optTransporte = transporteRepository.findById(id);
+        if (optTransporte.isPresent()) {
+            TransporteEntity transporte = optTransporte.get();
+            transporte.setTipo(transporteDTO.getTipo());
+            transporte.setEmpresa(transporteDTO.getEmpresa());
+            transporte.setPrecio(transporteDTO.getPrecio());
+            // Buscar el destino por id y asignar
+            DestinoEntity destino = destinoRepository.findById(transporteDTO.getDestinoId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Destino no encontrado con id: " + transporteDTO.getDestinoId()));
+            transporte.setDestino(destino);
             return transporteRepository.save(transporte);
-        });
+        }
+        return null;
     }
 
     // Eliminar transporte

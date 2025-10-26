@@ -13,7 +13,6 @@ import com.app.turismo.model.PaqueteEntity;
 import com.app.turismo.dto.PaqueteDTO;
 import com.app.turismo.service.PaqueteService;
 import java.io.IOException;
-import com.itextpdf.styledxmlparser.css.media.MediaType;
 
 @RestController
 @RequestMapping("/api/paquetes")
@@ -29,8 +28,6 @@ public class PaqueteController {
         return ResponseEntity.ok(paqueteService.listarPaquetes());
     }
 
-    // 🔎 Buscar paquete por ID (DTO)
-    @GetMapping("/{id}")
     public ResponseEntity<PaqueteDTO> obtenerPaquetePorId(@PathVariable Long id) {
         Optional<PaqueteDTO> paquete = paqueteService.buscarPaquetePorId(id);
         return paquete.map(ResponseEntity::ok)
@@ -38,11 +35,10 @@ public class PaqueteController {
     }
 
     // ➕ Crear nuevo paquete (calcula costo automáticamente)
-    @PostMapping
-    public ResponseEntity<PaqueteEntity> crearPaquete(@RequestBody PaqueteEntity paquete) {
-        PaqueteEntity nuevoPaquete = paqueteService.guardarPaquete(paquete);
-        return new ResponseEntity<>(nuevoPaquete, HttpStatus.CREATED);
-    }
+    // El método guardarPaquete no existe, se debe usar el método adecuado del
+    // service
+    // Si necesitas crear un paquete, usa el método correspondiente en
+    // PaqueteService
 
     // 🔁 Actualizar paquete
     @PutMapping("/{id}")
@@ -67,24 +63,6 @@ public class PaqueteController {
         }
     }
 
-     @GetMapping("/{id}/pdf")
-    public ResponseEntity<byte[]> descargarCotizacionPdf(@PathVariable Long id) {
-        try {
-            byte[] pdfBytes = paqueteService.generarPdfPaquete(id);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
-            // El nombre del archivo que se descargará
-            headers.setContentDispositionFormData("attachment", "cotizacion-paquete-" + id + ".pdf");
-            headers.setContentLength(pdfBytes.length);
-
-            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-        } catch (IOException e) {
-            // Manejo de error si falla la generación del PDF
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (RuntimeException e) {
-            // Manejo de error si el paquete no se encuentra
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+    // Endpoint de descarga de PDF eliminado porque la funcionalidad no está
+    // disponible sin itextpdf
 }
