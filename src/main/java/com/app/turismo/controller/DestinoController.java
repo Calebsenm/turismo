@@ -1,5 +1,6 @@
 package com.app.turismo.controller;
 
+import com.app.turismo.dto.DestinoDTO;
 import com.app.turismo.model.DestinoEntity;
 import com.app.turismo.service.DestinoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,15 @@ public class DestinoController {
     @Autowired
     private DestinoService destinoService;
 
-    // GET - Listar todos los destinos
+    // GET - Listar todos los destinos (DTO)
     @GetMapping
-    public ResponseEntity<List<DestinoEntity>> listarDestinos() {
+    public ResponseEntity<List<DestinoDTO>> listarDestinos() {
         return ResponseEntity.ok(destinoService.listarDestinos());
     }
 
-    // GET - Obtener destino por ID
+    // GET - Obtener destino por ID (DTO)
     @GetMapping("/{id}")
-    public ResponseEntity<DestinoEntity> obtenerDestinoPorId(@PathVariable Long id) {
+    public ResponseEntity<DestinoDTO> obtenerDestinoPorId(@PathVariable Long id) {
         return destinoService.obtenerDestinoPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

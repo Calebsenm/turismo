@@ -10,66 +10,65 @@ async function cargarDestinos() {
         console.log("🌎 Destinos obtenidos:", destinos);
 
         const selDestino = document.getElementById("destino");
-        selDestino.innerHTML = `<option value="">-- Selecciona un destino --</option>`;
+        selDestino.innerHTML = `<option value="">Selecciona destino...</option>`;
         destinos.forEach(d => {
-            selDestino.innerHTML += `<option value="${d.destino_id}">${d.nombre}</option>`;
+            const option = document.createElement("option");
+            option.value = d.destino_id;
+            option.textContent = d.nombre;
+            selDestino.appendChild(option);
         });
     } catch (error) {
         console.error("❌ Error cargando destinos:", error);
+        alert("No se pudieron cargar los destinos. Intenta nuevamente más tarde.");
     }
 }
 
 // 🔹 Cargar datos filtrados según destino
 document.getElementById("destino").addEventListener("change", async e => {
     const destinoId = e.target.value;
-    if (!destinoId) return;
+    if (!destinoId) {
+        document.getElementById("seccion-opciones").style.display = "none";
+        return;
+    }
 
     document.getElementById("seccion-opciones").style.display = "block";
 
     try {
-        // Traemos el destino seleccionado con sus relaciones
-        const destinoData = await fetch(`${API}/destinos/${destinoId}`).then(r => r.json());
-        console.log("🟢 Destino seleccionado:", destinoData);
+        const response = await fetch(`${API}/destinos/${destinoId}`);
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
-        hoteles = destinoData.hoteles || [];
-        actividades = destinoData.actividades || [];
-        transportes = destinoData.transportes || [];
+        const destino = await response.json();
+        console.log("Destino obtenido:", destino);
 
-        // Resetear valores
-        document.getElementById("numAdultos").value = 1;
-        document.getElementById("numNinos").value = 0;
-
-        // Cargar selectores
-        cargarSelect("hotel", hoteles, (h) => `${h.nombre} - Adulto: $${h.tarifaAdulto} / Niño: $${h.tarifaNino}`,
-            (h) => `data-tarifa-adulto="${h.tarifaAdulto}" data-tarifa-nino="${h.tarifaNino}"`);
-
-        cargarSelect("transporte", transportes, (t) => `${t.tipo} - ${t.empresa} ($${t.precio})`,
-            (t) => `data-precio="${t.precio}"`);
-
-        cargarSelect("actividades", actividades, (a) => `${a.nombre} ($${a.precio})`,
-            (a) => `data-precio="${a.precio}"`);
-
-        // 🔹 Recalcular total automáticamente
-        calcularTotal();
+        // Manejar datos devueltos, incluso si están vacíos
+        cargarSelect("hotel", destino.hoteles || [], "Selecciona un hotel");
+        cargarSelect("transporte", destino.transportes || [], "Selecciona un transporte");
+        cargarSelect("actividades", destino.actividades || [], "Selecciona actividades");
 
     } catch (err) {
         console.error("❌ Error cargando datos del destino:", err);
+        alert("No se pudieron cargar los datos del destino. Intenta nuevamente más tarde.");
     }
 });
 
-
-function cargarSelect(id, lista, texto, extraAttr) {
+function cargarSelect(id, lista, texto) {
     const sel = document.getElementById(id);
     sel.innerHTML = ""; // Limpia el select
 
     if (!lista || lista.length === 0) {
-        sel.innerHTML = `<option value="">-- No hay opciones disponibles --</option>`;
+        sel.innerHTML = `<option value="">No hay opciones disponibles</option>`;
         return;
     }
 
+    sel.innerHTML = `<option value="">${texto}</option>`;
     lista.forEach(i => {
-        const valor = i.id || i.hotel_id || i.transporte_id || i.actividad_id || i[Object.keys(i)[0]];
-        sel.innerHTML += `<option value="${valor}" ${extraAttr(i)}>${texto(i)}</option>`;
+        const option = document.createElement("option");
+        option.value = i.id || i.transporte_id || i.actividad_id || i.hotel_id; // Manejar diferentes tipos de datos
+        option.textContent = i.nombre || i.tipo || i.precio;
+        if (i.precio) option.dataset.precio = i.precio; // Agregar precio si está disponible
+        if (i.tarifaAdulto) option.dataset.tarifaAdulto = i.tarifaAdulto;
+        if (i.tarifaNino) option.dataset.tarifaNino = i.tarifaNino;
+        sel.appendChild(option);
     });
 }
 
@@ -79,62 +78,130 @@ function calcularTotal() {
     const adultos = parseInt(document.getElementById("numAdultos").value || 0);
     const ninos = parseInt(document.getElementById("numNinos").value || 0);
     const hotel = document.getElementById("hotel").selectedOptions[0];
+    const fechaInicio = document.getElementById("fechaInicio").value;
+    const fechaFin = document.getElementById("fechaFin").value;
 
-    if (hotel) {
-        total += (parseFloat(hotel.dataset.tarifaAdulto || 0) * adultos) +
-                 (parseFloat(hotel.dataset.tarifaNino || 0) * ninos);
+    // Calcular cantidad de noches
+    let noches = 1;
+    if (fechaInicio && fechaFin) {
+        const inicio = new Date(fechaInicio);
+        const fin = new Date(fechaFin);
+        const diffMs = fin - inicio;
+        noches = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
     }
 
-    [...document.getElementById("transporte").selectedOptions].forEach(t => total += parseFloat(t.dataset.precio || 0));
-    [...document.getElementById("actividades").selectedOptions].forEach(a => total += parseFloat(a.dataset.precio || 0)*(adultos + ninos));
+    if (hotel) {
+        total += ((parseFloat(hotel.dataset.tarifaAdulto || 0) * adultos) +
+                  (parseFloat(hotel.dataset.tarifaNino || 0) * ninos)) * noches;
+    }
+
+    [...document.getElementById("transporte").selectedOptions].forEach(t => {
+        total += parseFloat(t.dataset.precio || 0);
+    });
+
+    [...document.getElementById("actividades").selectedOptions].forEach(a => {
+        total += parseFloat(a.dataset.precio || 0) * (adultos + ninos);
+    });
 
     document.getElementById("total").textContent = total.toLocaleString();
     return total;
 }
 
-["hotel", "transporte", "actividades", "numAdultos", "numNinos"].forEach(id =>
-    document.getElementById(id).addEventListener("change", calcularTotal)
-);
+["hotel", "transporte", "actividades", "numAdultos", "numNinos", "fechaInicio", "fechaFin", "origen", "destino"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener("change", calcularTotal);
+        el.addEventListener("input", calcularTotal);
+    }
+});
+
 
 // 💾 Guardar paquete
 document.getElementById("btnGuardar").addEventListener("click", async () => {
-    const paquete = {
-        usuario: { user_id: 1 },
-        origen: document.getElementById("origen").value,
-        destino: { destino_id: document.getElementById("destino").value },
-        fechaInicio: document.getElementById("fechaInicio").value,
-        fechaFin: document.getElementById("fechaFin").value,
-        numAdultos: parseInt(document.getElementById("numAdultos").value),
-        numNinos: parseInt(document.getElementById("numNinos").value),
-        costoTotal: calcularTotal(),
-        nombre: "Paquete personalizado",
-        descripcion: "Cotización creada por el cliente"
-    };
+    try {
+        // Validar campos básicos
+        const origen = document.getElementById("origen").value;
+        const destinoId = parseInt(document.getElementById("destino").value);
+        const fechaInicio = document.getElementById("fechaInicio").value;
+        const fechaFin = document.getElementById("fechaFin").value;
+        const numAdultos = parseInt(document.getElementById("numAdultos").value) || 0;
+        const numNinos = parseInt(document.getElementById("numNinos").value) || 0;
 
-    const res = await fetch(`${API}/paquetes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(paquete)
-    });
+        if (!origen || !destinoId || !fechaInicio || !fechaFin) {
+            alert("Por favor completa todos los campos antes de guardar.");
+            return;
+        }
 
-    const mensaje = document.getElementById("mensaje");
-    if (res.ok) {
-        mensaje.textContent = "✅ Paquete guardado con éxito.";
-        mensaje.className = "text-success";
-    } else {
-        mensaje.textContent = "❌ Error al guardar el paquete.";
+        // Construir objeto paquete
+        const paquete = {
+            usuario: { user_id: 1 }, // Cambia si tienes ID dinámico de usuario
+            origen: origen,
+            destino: { destino_id: destinoId },
+            fechaInicio: fechaInicio,
+            fechaFin: fechaFin,
+            numAdultos: numAdultos,
+            numNinos: numNinos,
+            costoTotal: calcularTotal(),
+            nombre: "Paquete personalizado",
+            descripcion: "Cotización creada por el cliente",
+            hoteles: [...document.getElementById("hotel").selectedOptions].map(h => ({ hotel_id: parseInt(h.value) })),
+            transportes: [...document.getElementById("transporte").selectedOptions].map(t => ({ transporte_id: parseInt(t.value) })),
+            actividades: [...document.getElementById("actividades").selectedOptions].map(a => ({ actividad_id: parseInt(a.value) }))
+        };
+
+        console.log("Enviando paquete:", paquete);
+
+        // Enviar al backend
+        const res = await fetch(`${API}/paquetes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(paquete)
+        });
+
+        const mensaje = document.getElementById("mensaje");
+        if (res.ok) {
+            const data = await res.json();
+            mensaje.textContent = "✅ Paquete guardado con éxito.";
+            mensaje.className = "text-success";
+            console.log("Paquete guardado:", data);
+            // Mostrar popup de confirmación
+            alert("✅ Paquete guardado con éxito.");
+            // Limpiar campos manualmente
+            document.getElementById("origen").value = "";
+            document.getElementById("destino").value = "";
+            document.getElementById("fechaInicio").value = "";
+            document.getElementById("fechaFin").value = "";
+            document.getElementById("numAdultos").value = "";
+            document.getElementById("numNinos").value = "";
+            document.getElementById("hotel").selectedIndex = 0;
+            document.getElementById("transporte").selectedIndex = 0;
+            document.getElementById("actividades").selectedIndex = 0;
+            document.getElementById("seccion-opciones").style.display = "none";
+            document.getElementById("total").textContent = "0";
+        } else {
+            const errorData = await res.json().catch(() => ({}));
+            mensaje.textContent = `❌ Error al guardar el paquete: ${errorData.message || res.status}`;
+            mensaje.className = "text-danger";
+            console.error("Error al guardar paquete:", errorData);
+        }
+    } catch (err) {
+        const mensaje = document.getElementById("mensaje");
+        mensaje.textContent = `❌ Error al guardar el paquete: ${err.message}`;
         mensaje.className = "text-danger";
+        console.error("Excepción al guardar paquete:", err);
     }
 });
+
+
 
 // 🎒 Paquetes prearmados
 function cargarPaquetesPrearmados() {
     const lista = [
         { nombre: "Plan Familiar en Coveñas", descripcion: "3 días con hotel y lancha", precio: 780000 },
-        { nombre: "Escapada Romántica Cartagena", descripcion: "2 noches y cena especial", precio: 1150000 },
-        { nombre: "Aventura en el Eje Cafetero", descripcion: "Tour café + canopy + hotel", precio: 950000 }
     ];
-    const cont = document.getElementById("paquetes-prearmados");
+
+    const cont = document.getElementById("paquetesPrearmados");
+    cont.innerHTML = ""; // Limpiar contenido anterior
     lista.forEach(p => cont.innerHTML += `
         <div class="col-md-4 mb-3">
             <div class="card h-100 p-3 shadow-sm">
@@ -146,5 +213,8 @@ function cargarPaquetesPrearmados() {
     `);
 }
 
-cargarDestinos();
-cargarPaquetesPrearmados();
+// Inicialización segura cuando el DOM está listo
+document.addEventListener("DOMContentLoaded", function() {
+    cargarDestinos();
+    cargarPaquetesPrearmados();
+});

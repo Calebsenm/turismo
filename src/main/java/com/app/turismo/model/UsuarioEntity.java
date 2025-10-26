@@ -1,5 +1,6 @@
 package com.app.turismo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,8 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -34,7 +33,7 @@ public class UsuarioEntity {
     @Column(name = "user_type", nullable = false)
     private String userType;
 
-    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<PaqueteEntity> paquetes;
+    @OneToMany(mappedBy = "usuario")
+    @JsonIgnore
+    private java.util.List<PaqueteEntity> paquetes;
 }
-

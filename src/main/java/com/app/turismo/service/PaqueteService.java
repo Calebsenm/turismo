@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.app.turismo.model.*;
 import com.app.turismo.repository.*;
+import com.app.turismo.dto.PaqueteDTO;
+import java.util.stream.Collectors;
 
 @Service
 public class PaqueteService {
@@ -25,18 +27,54 @@ public class PaqueteService {
     @Autowired
     private TransporteRepository transporteRepository;
 
+    @Autowired
+    private DestinoRepository destinoRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     /**
      * Lista todos los paquetes registrados
      */
-    public List<PaqueteEntity> listarPaquetes() {
-        return paqueteRepository.findAll();
+    public List<PaqueteDTO> listarPaquetes() {
+        return paqueteRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     /**
      * Busca un paquete por su ID
      */
-    public Optional<PaqueteEntity> buscarPaquetePorId(Long id) {
-        return paqueteRepository.findById(id);
+    public Optional<PaqueteDTO> buscarPaquetePorId(Long id) {
+        return paqueteRepository.findById(id)
+                .map(this::mapToDTO);
+    }
+
+    // Método para mapear PaqueteEntity a PaqueteDTO
+    private PaqueteDTO mapToDTO(PaqueteEntity entity) {
+        PaqueteDTO dto = new PaqueteDTO();
+        if (entity.getUsuario() != null)
+            dto.usuarioId = entity.getUsuario().getUser_id();
+        if (entity.getDestino() != null)
+            dto.destinoId = entity.getDestino().getDestino_id();
+        dto.origen = entity.getOrigen();
+        dto.fechaInicio = entity.getFechaInicio();
+        dto.fechaFin = entity.getFechaFin();
+        dto.costoTotal = entity.getCostoTotal();
+        dto.nombre = entity.getNombre();
+        dto.descripcion = entity.getDescripcion();
+        dto.numAdultos = entity.getNumAdultos();
+        dto.numNinos = entity.getNumNinos();
+        dto.tipoPaquete = entity.getTipoPaquete();
+        if (entity.getHoteles() != null)
+            dto.hoteles = entity.getHoteles().stream().map(HotelEntity::getHotel_id).collect(Collectors.toList());
+        if (entity.getTransportes() != null)
+            dto.transportes = entity.getTransportes().stream().map(TransporteEntity::getTransporte_id)
+                    .collect(Collectors.toList());
+        if (entity.getActividades() != null)
+            dto.actividades = entity.getActividades().stream().map(ActividadEntity::getActividad_id)
+                    .collect(Collectors.toList());
+        return dto;
     }
 
     /**
@@ -44,6 +82,42 @@ public class PaqueteService {
      * y el tipo de transporte según el origen y el destino.
      */
     public PaqueteEntity guardarPaquete(PaqueteEntity paquete) {
+        // Asociar destino persistente
+        if (paquete.getDestino() != null && paquete.getDestino().getDestino_id() != null) {
+            DestinoEntity destino = destinoRepository.findById(paquete.getDestino().getDestino_id())
+                    .orElseThrow(() -> new RuntimeException("Destino no encontrado"));
+            paquete.setDestino(destino);
+        }
+        // Asociar usuario persistente
+        if (paquete.getUsuario() != null && paquete.getUsuario().getUser_id() != null) {
+            UsuarioEntity usuario = usuarioRepository.findById(paquete.getUsuario().getUser_id())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            paquete.setUsuario(usuario);
+        }
+        // Asociar hoteles persistentes
+        if (paquete.getHoteles() != null) {
+            List<HotelEntity> hoteles = paquete.getHoteles().stream()
+                    .map(h -> hotelRepository.findById(h.getHotel_id())
+                            .orElseThrow(() -> new RuntimeException("Hotel no encontrado")))
+                    .toList();
+            paquete.setHoteles(hoteles);
+        }
+        // Asociar transportes persistentes
+        if (paquete.getTransportes() != null) {
+            List<TransporteEntity> transportes = paquete.getTransportes().stream()
+                    .map(t -> transporteRepository.findById(t.getTransporte_id())
+                            .orElseThrow(() -> new RuntimeException("Transporte no encontrado")))
+                    .toList();
+            paquete.setTransportes(transportes);
+        }
+        // Asociar actividades persistentes
+        if (paquete.getActividades() != null) {
+            List<ActividadEntity> actividades = paquete.getActividades().stream()
+                    .map(a -> actividadRepository.findById(a.getActividad_id())
+                            .orElseThrow(() -> new RuntimeException("Actividad no encontrada")))
+                    .toList();
+            paquete.setActividades(actividades);
+        }
 
         // 🔹 Calcular la duración del viaje
         long dias = ChronoUnit.DAYS.between(paquete.getFechaInicio(), paquete.getFechaFin());

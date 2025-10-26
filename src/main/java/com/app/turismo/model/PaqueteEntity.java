@@ -26,6 +26,7 @@ public class PaqueteEntity {
 
     @ManyToOne
     @JoinColumn(name = "destino_id", referencedColumnName = "destino_id")
+    @com.fasterxml.jackson.annotation.JsonBackReference // Evita recursión infinita
     private DestinoEntity destino;
 
     // 🔹 Nueva columna: ciudad de origen
@@ -56,4 +57,40 @@ public class PaqueteEntity {
 
     @Column(name = "tipo_paquete")
     private String tipoPaquete; // "familiar", "romántico", "grupal", etc.
+
+    @ManyToMany
+    @JoinTable(name = "paquete_hotel", joinColumns = @JoinColumn(name = "paquete_id"), inverseJoinColumns = @JoinColumn(name = "hotel_id"))
+    private java.util.List<HotelEntity> hoteles;
+
+    @ManyToMany
+    @JoinTable(name = "paquete_transporte", joinColumns = @JoinColumn(name = "paquete_id"), inverseJoinColumns = @JoinColumn(name = "transporte_id"))
+    private java.util.List<TransporteEntity> transportes;
+
+    @ManyToMany
+    @JoinTable(name = "paquete_actividad", joinColumns = @JoinColumn(name = "paquete_id"), inverseJoinColumns = @JoinColumn(name = "actividad_id"))
+    private java.util.List<ActividadEntity> actividades;
+
+    public java.util.List<HotelEntity> getHoteles() {
+        return hoteles;
+    }
+
+    public void setHoteles(java.util.List<HotelEntity> hoteles) {
+        this.hoteles = hoteles;
+    }
+
+    public java.util.List<TransporteEntity> getTransportes() {
+        return transportes;
+    }
+
+    public void setTransportes(java.util.List<TransporteEntity> transportes) {
+        this.transportes = transportes;
+    }
+
+    public java.util.List<ActividadEntity> getActividades() {
+        return actividades;
+    }
+
+    public void setActividades(java.util.List<ActividadEntity> actividades) {
+        this.actividades = actividades;
+    }
 }

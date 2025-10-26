@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.app.turismo.model.PaqueteEntity;
+import com.app.turismo.dto.PaqueteDTO;
 import com.app.turismo.service.PaqueteService;
 
 @RestController
@@ -19,16 +20,16 @@ public class PaqueteController {
     @Autowired
     private PaqueteService paqueteService;
 
-    // 🧭 Listar todos los paquetes
+    // 🧭 Listar todos los paquetes (DTO)
     @GetMapping
-    public ResponseEntity<List<PaqueteEntity>> listarPaquetes() {
+    public ResponseEntity<List<PaqueteDTO>> listarPaquetes() {
         return ResponseEntity.ok(paqueteService.listarPaquetes());
     }
 
-    // 🔎 Buscar paquete por ID
+    // 🔎 Buscar paquete por ID (DTO)
     @GetMapping("/{id}")
-    public ResponseEntity<PaqueteEntity> obtenerPaquetePorId(@PathVariable Long id) {
-        Optional<PaqueteEntity> paquete = paqueteService.buscarPaquetePorId(id);
+    public ResponseEntity<PaqueteDTO> obtenerPaquetePorId(@PathVariable Long id) {
+        Optional<PaqueteDTO> paquete = paqueteService.buscarPaquetePorId(id);
         return paquete.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
