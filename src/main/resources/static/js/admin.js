@@ -84,20 +84,50 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         paquetes.forEach(p => {
-            cont.innerHTML += `
-                <div class="card mb-2 p-2">
-                    <div><b>${p.nombre}</b> (${p.descripcion})</div>
-                    <div><b>ID:</b> ${p.paquete_id ?? ''}</div>
-                    <div><b>Destino:</b> ${p.destino_id ?? ''}</div>
-                    <div><b>Fechas:</b> ${p.fechaInicio ?? ''} a ${p.fechaFin ?? ''}</div>
-                    <div><b>Transporte:</b> ${(p.transportes && p.transportes.length) ? p.transportes.map(t => `${t.tipo} (${t.empresa ?? ''}, $${t.precio ?? ''})`).join(', ') : 'Sin transporte'}</div>
-                    <div><b>Hoteles:</b> ${(p.hoteles && p.hoteles.length) ? p.hoteles.map(h => `${h.nombre} (Adulto: $${h.tarifaAdulto ?? ''}, Niño: $${h.tarifaNino ?? ''})`).join(', ') : 'Sin hoteles'}</div>
-                    <div><b>Actividades:</b> ${(p.actividades && p.actividades.length) ? p.actividades.map(a => `${a.nombre} ($${a.precio ?? ''})`).join(', ') : 'Sin actividades'}</div>
-                    <div><b>Costo total:</b> ${p.costoTotal?.toLocaleString('es-CO', { style: 'currency', currency: 'COP' }) ?? ''}</div>
-                    <div><b>Usuario:</b> ${p.usuario_id ?? ''}</div>
-                    <div><b>Fecha de creación:</b> ${p.fechaCreacion ?? ''}</div>
-                </div>
-            `;
+                cont.innerHTML += `
+                    <div class="card mb-3 p-3">
+                        <h5 class="mb-2">${p.nombre}</h5>
+                        <div class="mb-1 text-muted">${p.descripcion}</div>
+                        <hr>
+                        <div><b>ID Paquete:</b> ${p.paquete_id ?? p.paqueteId ?? ''}</div>
+                        <div><b>Destino ID:</b> ${p.destino_id ?? p.destinoId ?? ''}</div>
+                        <div><b>Origen:</b> ${p.origen ?? ''}</div>
+                        <div><b>Fechas:</b> <span class="badge bg-info">${p.fechaInicio ?? ''}</span> a <span class="badge bg-info">${p.fechaFin ?? ''}</span></div>
+                        <div><b>Tipo de paquete:</b> ${p.tipoPaquete ?? ''}</div>
+                        <div><b>Adultos:</b> ${p.numAdultos ?? ''} &nbsp; <b>Niños:</b> ${p.numNinos ?? ''}</div>
+                        <hr>
+                        <div><b>Transportes:</b></div>
+                        ${(p.transportes && p.transportes.length) ? p.transportes.map(t => `
+                            <div class="border rounded p-2 mb-2 ms-2">
+                                <b>ID:</b> ${t.transporte_id ?? t.transporteId ?? ''}<br>
+                                <b>Tipo:</b> ${t.tipo ?? ''}<br>
+                                <b>Empresa:</b> ${t.empresa ?? ''}<br>
+                                <b>Precio:</b> $${t.precio ?? ''}<br>
+                            </div>
+                        `).join('') : '<div class="ms-2">Sin transporte</div>'}
+                        <div><b>Hoteles:</b></div>
+                        ${(p.hoteles && p.hoteles.length) ? p.hoteles.map(h => `
+                            <div class="border rounded p-2 mb-2 ms-2">
+                                <b>ID:</b> ${h.hotel_id ?? h.hotelId ?? ''}<br>
+                                <b>Nombre:</b> ${h.nombre ?? ''}<br>
+                                <b>Tarifa adulto:</b> $${h.tarifaAdulto ?? ''}<br>
+                                <b>Tarifa niño:</b> $${h.tarifaNino ?? ''}<br>
+                            </div>
+                        `).join('') : '<div class="ms-2">Sin hoteles</div>'}
+                        <div><b>Actividades:</b></div>
+                        ${(p.actividades && p.actividades.length) ? p.actividades.map(a => `
+                            <div class="border rounded p-2 mb-2 ms-2">
+                                <b>ID:</b> ${a.actividad_id ?? a.actividadId ?? ''}<br>
+                                <b>Nombre:</b> ${a.nombre ?? ''}<br>
+                                <b>Descripción:</b> ${a.descripcion ?? ''}<br>
+                                <b>Precio:</b> $${a.precio ?? ''}<br>
+                            </div>
+                        `).join('') : '<div class="ms-2">Sin actividades</div>'}
+                        <hr>
+                        <div><b>Costo total:</b> <span class="badge bg-success">${p.costoTotal?.toLocaleString('es-CO', { style: 'currency', currency: 'COP' }) ?? ''}</span></div>
+                        <div><b>Usuario ID:</b> ${p.usuario_id ?? p.usuarioId ?? ''}</div>
+                    </div>
+                `;
         });
     }
 // admin.js
