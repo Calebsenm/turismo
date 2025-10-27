@@ -20,7 +20,7 @@ public class PaqueteDTO {
     public Integer numAdultos;
     public Integer numNinos;
     public String tipoPaquete;
-    public List<Long> hoteles;
-    public List<Long> transportes;
-    public List<Long> actividades;
+    public List<com.app.turismo.model.HotelEntity> hoteles;
+    public List<com.app.turismo.model.TransporteEntity> transportes;
+    public List<com.app.turismo.model.ActividadEntity> actividades;
 }

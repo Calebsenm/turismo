@@ -7,7 +7,99 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = '/public/login';
         });
     }
+
+        // --- Filtros de paquetes ---
+        cargarDestinosFiltro();
+        cargarTransportesFiltro();
+        cargarPaquetesAdmin();
+        document.getElementById('filtroPaqueteDestino').addEventListener('change', filtrarPaquetesAdmin);
+        document.getElementById('filtroPaqueteFechaInicio').addEventListener('change', filtrarPaquetesAdmin);
+        document.getElementById('filtroPaqueteFechaFin').addEventListener('change', filtrarPaquetesAdmin);
+        document.getElementById('filtroPaqueteTransporte').addEventListener('change', filtrarPaquetesAdmin);
 });
+
+    // Cargar destinos en filtro
+    function cargarDestinosFiltro() {
+        fetch('/api/destinos', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') } })
+            .then(res => res.json())
+            .then(destinos => {
+                const select = document.getElementById('filtroPaqueteDestino');
+                destinos.forEach(d => {
+                    select.innerHTML += `<option value="${d.destino_id}">${d.nombre}</option>`;
+                });
+            });
+    }
+
+    // Cargar transportes en filtro
+    function cargarTransportesFiltro() {
+        fetch('/api/transportes', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') } })
+            .then(res => res.json())
+            .then(transportes => {
+                const select = document.getElementById('filtroPaqueteTransporte');
+                const tipos = [...new Set(transportes.map(t => t.tipo))];
+                tipos.forEach(tipo => {
+                    select.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+                });
+            });
+    }
+
+    // Cargar todos los paquetes para admin
+    function cargarPaquetesAdmin() {
+        fetch('/api/paquetes', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') } })
+            .then(res => res.json())
+            .then(paquetes => {
+                window._paquetesAdmin = paquetes;
+                filtrarPaquetesAdmin();
+            });
+    }
+
+    // Filtrar y mostrar paquetes según los filtros
+    function filtrarPaquetesAdmin() {
+        const destinoId = document.getElementById('filtroPaqueteDestino').value;
+        const fechaInicio = document.getElementById('filtroPaqueteFechaInicio').value;
+        const fechaFin = document.getElementById('filtroPaqueteFechaFin').value;
+        const tipoTransporte = document.getElementById('filtroPaqueteTransporte').value;
+        let paquetes = window._paquetesAdmin || [];
+        paquetes = paquetes.filter(p => {
+            let ok = true;
+            if (destinoId && String(p.destino_id) !== String(destinoId)) ok = false;
+            if (fechaInicio && p.fechaInicio < fechaInicio) ok = false;
+            if (fechaFin && p.fechaFin > fechaFin) ok = false;
+            if (tipoTransporte) {
+                // Filtra ignorando mayúsculas/minúsculas y espacios
+                const tipoFiltro = tipoTransporte.trim().toLowerCase();
+                const tieneTransporte = p.transportes && p.transportes.length && p.transportes.some(t => (t.tipo ?? '').trim().toLowerCase() === tipoFiltro);
+                if (!tieneTransporte) ok = false;
+            }
+            return ok;
+        });
+        mostrarPaquetesAdmin(paquetes);
+    }
+
+    function mostrarPaquetesAdmin(paquetes) {
+        const cont = document.getElementById('listaPaquetesAdmin');
+        cont.innerHTML = '';
+        if (!paquetes.length) {
+            cont.innerHTML = '<p class="text-muted">No se encontraron paquetes con los filtros seleccionados.</p>';
+            return;
+        }
+        paquetes.forEach(p => {
+            cont.innerHTML += `
+                <div class="card mb-2 p-2">
+                    <div><b>${p.nombre}</b> (${p.descripcion})</div>
+                    <div><b>ID:</b> ${p.paquete_id ?? ''}</div>
+                    <div><b>Destino:</b> ${p.destino_id ?? ''}</div>
+                    <div><b>Fechas:</b> ${p.fechaInicio ?? ''} a ${p.fechaFin ?? ''}</div>
+                    <div><b>Transporte:</b> ${(p.transportes && p.transportes.length) ? p.transportes.map(t => `${t.tipo} (${t.empresa ?? ''}, $${t.precio ?? ''})`).join(', ') : 'Sin transporte'}</div>
+                    <div><b>Hoteles:</b> ${(p.hoteles && p.hoteles.length) ? p.hoteles.map(h => `${h.nombre} (Adulto: $${h.tarifaAdulto ?? ''}, Niño: $${h.tarifaNino ?? ''})`).join(', ') : 'Sin hoteles'}</div>
+                    <div><b>Actividades:</b> ${(p.actividades && p.actividades.length) ? p.actividades.map(a => `${a.nombre} ($${a.precio ?? ''})`).join(', ') : 'Sin actividades'}</div>
+                    <div><b>Costo total:</b> ${p.costoTotal?.toLocaleString('es-CO', { style: 'currency', currency: 'COP' }) ?? ''}</div>
+                    <div><b>Usuario:</b> ${p.usuario_id ?? ''}</div>
+                    <div><b>Fecha de creación:</b> ${p.fechaCreacion ?? ''}</div>
+                </div>
+            `;
+        });
+    }
 // admin.js
 // ---- FUNCIONES DE USUARIOS ----
 function crearUsuario(e) {

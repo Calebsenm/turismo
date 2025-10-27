@@ -10,13 +10,15 @@
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <span class="fs-4">Mi App de Turismo</span>
             </a>
-            <ul class="nav nav-pills">
+            <ul class="nav nav-pills align-items-center">
                 <li class="nav-item"><a th:href="@{/public/home}" class="nav-link active" aria-current="page">Inicio</a></li>
                 <li class="nav-item"><a th:href="@{/public/armar-paquete}" class="nav-link">Armar Paquete</a></li>
-                <li class="nav-item"><a th:href="@{/public/mis-paquetes}" class="nav-link">Mis Paquetes</a></li>
                 <li class="nav-item" id="admin-menu-item" style="display:none;"><a th:href="@{/admin-panel}" class="nav-link">Panel Admin</a></li>
-                <li class="nav-item"><span id="user-name" class="nav-link text-primary"></span></li>
-                <li class="nav-item"><button id="logout-button" class="btn btn-danger ms-2">Cerrar Sesión</button></li>
+                <!-- Bloque vertical para usuario y logout -->
+                <li class="nav-item d-flex flex-column align-items-end ms-3" style="min-width:120px;">
+                    <span id="user-name" style="font-size:0.95rem; color:#555; font-weight:500; margin-bottom:2px; padding:0 6px; text-align:right;"></span>
+                    <button id="logout-button" class="btn btn-danger btn-sm mt-1" style="width:100%;">Cerrar Sesión</button>
+                </li>
             </ul>
         </header>
     <script>

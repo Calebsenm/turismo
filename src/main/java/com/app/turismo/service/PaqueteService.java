@@ -65,27 +65,15 @@ public class PaqueteService {
         paquete.setTipoPaquete(dto.tipoPaquete);
         // Asignar hoteles
         if (dto.hoteles != null) {
-            java.util.Set<HotelEntity> hoteles = dto.hoteles.stream()
-                    .map(id -> hotelRepository.findById(id).orElse(null))
-                    .filter(h -> h != null)
-                    .collect(java.util.stream.Collectors.toSet());
-            paquete.setHoteles(hoteles);
+            paquete.setHoteles(new java.util.HashSet<>(dto.hoteles));
         }
         // Asignar transportes
         if (dto.transportes != null) {
-            java.util.Set<TransporteEntity> transportes = dto.transportes.stream()
-                    .map(id -> transporteRepository.findById(id).orElse(null))
-                    .filter(t -> t != null)
-                    .collect(java.util.stream.Collectors.toSet());
-            paquete.setTransportes(transportes);
+            paquete.setTransportes(new java.util.HashSet<>(dto.transportes));
         }
         // Asignar actividades
         if (dto.actividades != null) {
-            java.util.Set<ActividadEntity> actividades = dto.actividades.stream()
-                    .map(id -> actividadRepository.findById(id).orElse(null))
-                    .filter(a -> a != null)
-                    .collect(java.util.stream.Collectors.toSet());
-            paquete.setActividades(actividades);
+            paquete.setActividades(new java.util.HashSet<>(dto.actividades));
         }
         // Calcular costo total (puedes mejorar la lógica)
         paquete.setCostoTotal(dto.costoTotal != null ? dto.costoTotal : 0.0);
@@ -171,13 +159,13 @@ public class PaqueteService {
             org.hibernate.Hibernate.initialize(entity.getActividades());
         } catch (Exception e) {
         }
-        dto.hoteles = entity.getHoteles() != null ? entity.getHoteles().stream().map(h -> h.getHotel_id()).toList()
-                : null;
+        // Enviar objetos completos para frontend admin
+        dto.hoteles = entity.getHoteles() != null ? entity.getHoteles().stream().collect(Collectors.toList()) : null;
         dto.transportes = entity.getTransportes() != null
-                ? entity.getTransportes().stream().map(t -> t.getTransporte_id()).toList()
+                ? entity.getTransportes().stream().collect(Collectors.toList())
                 : null;
         dto.actividades = entity.getActividades() != null
-                ? entity.getActividades().stream().map(a -> a.getActividad_id()).toList()
+                ? entity.getActividades().stream().collect(Collectors.toList())
                 : null;
         return dto;
     }
@@ -205,7 +193,8 @@ public class PaqueteService {
      */
     @Transactional(readOnly = true)
     public List<PaqueteDTO> listarPaquetes() {
-        return paqueteRepository.findAll().stream()
+        // Usar fetch join para inicializar todas las relaciones
+        return paqueteRepository.findAllWithAllRelations().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

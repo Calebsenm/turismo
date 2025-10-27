@@ -1,0 +1,32 @@
+<!-- fragments/filtro-paquetes.html -->
+<div th:fragment="filtroPaquetes">
+    <div class="card mb-4 p-3">
+        <h5 class="mb-3">Buscar y filtrar paquetes</h5>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Destino</label>
+                <select id="filtroPaqueteDestino" class="form-select">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha inicio</label>
+                <input type="date" id="filtroPaqueteFechaInicio" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha fin</label>
+                <input type="date" id="filtroPaqueteFechaFin" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tipo de transporte</label>
+                <select id="filtroPaqueteTransporte" class="form-select">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4 p-3">
+        <h5 class="mb-3">Resultados de paquetes</h5>
+    <div id="listaPaquetesAdmin" style="max-height: 500px; overflow-y: auto;"></div>
+    </div>
+</div>
