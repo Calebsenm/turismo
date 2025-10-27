@@ -8,7 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <script th:src="@{/js/auth-guard.js}"></script>
 </head>
-<body>
+<body class="container-fluid mt-4" style="max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px;">
     <script>
         // Filtro JS para proteger la vista del panel admin
         if (!localStorage.getItem('jwtToken')) {
@@ -33,7 +33,7 @@
     </script>
     <div th:replace="fragments/menu :: menu"></div>
 
-    <div class="container my-5">
+    <div class="my-5">
         <h2 class="text-center mb-4">Panel de Administración</h2>
         <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
             <li class="nav-item" role="presentation">

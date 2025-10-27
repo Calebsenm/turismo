@@ -1,0 +1,96 @@
+<!-- fragments/menu.html -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+        .menu-header {
+            font-size: 1.7rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .menu-nav {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .menu-link {
+            font-size: 0.95rem;
+            color: #444;
+            background: none;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            transition: background 0.2s, color 0.2s;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .menu-link:hover {
+            background: #e3e3e3;
+            color: #007bff;
+        }
+        .menu-link.selected, .menu-link.active {
+            background: #007bff;
+            color: #fff;
+            font-weight: 600;
+        }
+        .menu-user {
+            text-align: center;
+            font-size: 1rem;
+            color: #007bff;
+            margin-bottom: 0.2rem;
+        }
+        .menu-logout {
+            display: block;
+            margin: 0 auto 0.5rem auto;
+            font-size: 0.9rem;
+            padding: 0.3rem 1.2rem;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div th:fragment="menu">
+        <div class="menu-container">
+            <div class="menu-header">Mi App de Turismo</div>
+            <nav class="menu-nav">
+                <a th:href="@{/public/home}" th:classappend="${#httpServletRequest.requestURI.contains('/public/home')} ? 'selected' : ''" class="menu-link">Inicio</a>
+                <a th:href="@{/public/armar-paquete}" th:classappend="${#httpServletRequest.requestURI.contains('/public/armar-paquete')} ? 'selected' : ''" class="menu-link">Armar Paquete</a>
+                <a th:href="@{/admin-panel}" th:if="${#httpServletRequest.requestURI.contains('/admin-panel')} || ${isAdmin}" th:classappend="${#httpServletRequest.requestURI.contains('/admin-panel')} ? 'selected' : ''" class="menu-link" id="admin-menu-item">Panel Admin</a>
+            </nav>
+            <div class="menu-user" id="user-name"></div>
+            <button id="logout-button" class="btn btn-danger menu-logout">Cerrar Sesión</button>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', async function() {
+                const token = localStorage.getItem('jwtToken');
+                if (token) {
+                    try {
+                        const res = await fetch('/api/usuarios/me', {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.userType && data.userType.toUpperCase() === 'ADMIN') {
+                                document.getElementById('admin-menu-item').style.display = '';
+                            }
+                            if (data.name) {
+                                document.getElementById('user-name').textContent = data.name;
+                            }
+                        }
+                    } catch (e) {}
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

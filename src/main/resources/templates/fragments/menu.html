@@ -3,24 +3,71 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/css/menu.css}">
 </head>
 <body>
     <div th:fragment="menu">
-        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-                <span class="fs-4">Mi App de Turismo</span>
-            </a>
-            <ul class="nav nav-pills align-items-center">
-                <li class="nav-item"><a th:href="@{/public/home}" class="nav-link active" aria-current="page">Inicio</a></li>
-                <li class="nav-item"><a th:href="@{/public/armar-paquete}" class="nav-link">Armar Paquete</a></li>
-                <li class="nav-item" id="admin-menu-item" style="display:none;"><a th:href="@{/admin-panel}" class="nav-link">Panel Admin</a></li>
-                <!-- Bloque vertical para usuario y logout -->
-                <li class="nav-item d-flex flex-column align-items-end ms-3" style="min-width:120px;">
-                    <span id="user-name" style="font-size:0.95rem; color:#555; font-weight:500; margin-bottom:2px; padding:0 6px; text-align:right;"></span>
-                    <button id="logout-button" class="btn btn-danger btn-sm mt-1" style="width:100%;">Cerrar Sesión</button>
-                </li>
-            </ul>
+        <header class="menu-header">
+            <div class="menu-logo">
+                <span style="font-size:1.5rem;vertical-align:middle;">&#128747;</span>
+                <span class="fs-4">TravelCo</span>
+            </div>
+            <nav class="menu-nav">
+                <ul class="nav nav-center">
+                    <li class="nav-item">
+                        <a th:href="@{/public/home}" class="nav-link active" aria-current="page">
+                            <span style="font-size:1.2em;vertical-align:middle;">&#127968;</span> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/public/armar-paquete}" class="nav-link">
+                            <span style="font-size:1.2em;vertical-align:middle;">&#128197;</span> Armar Paquete
+                        </a>
+                    </li>
+                    <li class="nav-item" id="admin-menu-item" style="display:none;">
+                        <a th:href="@{/admin-panel}" class="nav-link">
+                            <span style="font-size:1.2em;vertical-align:middle;">&#128295;</span> Panel Admin
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="menu-user">
+                <span id="user-name" class="nav-link text-primary"></span>
+                <button id="logout-button" class="btn btn-danger ms-2">Cerrar Sesión</button>
+            </div>
         </header>
+        <style>
+            .menu-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0.7rem 1.5rem 0.2rem 1.5rem;
+                border-bottom: 1px solid #e3e3e3;
+                background: #fff;
+            }
+            .menu-logo {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .menu-nav {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+            }
+            .nav.nav-center {
+                display: flex;
+                gap: 2.2rem;
+                margin: 0;
+                padding: 0;
+            }
+            .menu-user {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                min-width: 120px;
+            }
+        </style>
     <script>
         // Mostrar el menú de admin solo si el usuario es admin y mostrar el nombre del usuario logueado
         document.addEventListener('DOMContentLoaded', async function() {
