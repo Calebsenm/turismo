@@ -46,7 +46,9 @@ public class SecurityConfig {
                                                                 "/js/**",
                                                                 "/images/**",
                                                                 "/admin-panel",
-                                                                "/api/usuarios/me")
+                                                                "/api/usuarios/me",
+                                                                "/api/paquetes/mis",
+                                                                "/api/paquetes/usuario/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin-panel").hasAuthority("ROLE_ADMIN")
                                                 .requestMatchers("/api/**").authenticated()

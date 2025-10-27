@@ -60,37 +60,37 @@ public class PaqueteEntity {
 
     @ManyToMany
     @JoinTable(name = "paquete_hotel", joinColumns = @JoinColumn(name = "paquete_id"), inverseJoinColumns = @JoinColumn(name = "hotel_id"))
-    private java.util.List<HotelEntity> hoteles;
+    private java.util.Set<HotelEntity> hoteles = new java.util.HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "paquete_transporte", joinColumns = @JoinColumn(name = "paquete_id"), inverseJoinColumns = @JoinColumn(name = "transporte_id"))
-    private java.util.List<TransporteEntity> transportes;
+    private java.util.Set<TransporteEntity> transportes = new java.util.HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "paquete_actividad", joinColumns = @JoinColumn(name = "paquete_id"), inverseJoinColumns = @JoinColumn(name = "actividad_id"))
-    private java.util.List<ActividadEntity> actividades;
+    private java.util.Set<ActividadEntity> actividades = new java.util.HashSet<>();
 
-    public java.util.List<HotelEntity> getHoteles() {
+    public java.util.Set<HotelEntity> getHoteles() {
         return hoteles;
     }
 
-    public void setHoteles(java.util.List<HotelEntity> hoteles) {
+    public void setHoteles(java.util.Set<HotelEntity> hoteles) {
         this.hoteles = hoteles;
     }
 
-    public java.util.List<TransporteEntity> getTransportes() {
+    public java.util.Set<TransporteEntity> getTransportes() {
         return transportes;
     }
 
-    public void setTransportes(java.util.List<TransporteEntity> transportes) {
+    public void setTransportes(java.util.Set<TransporteEntity> transportes) {
         this.transportes = transportes;
     }
 
-    public java.util.List<ActividadEntity> getActividades() {
+    public java.util.Set<ActividadEntity> getActividades() {
         return actividades;
     }
 
-    public void setActividades(java.util.List<ActividadEntity> actividades) {
+    public void setActividades(java.util.Set<ActividadEntity> actividades) {
         this.actividades = actividades;
     }
 }

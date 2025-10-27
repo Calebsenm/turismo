@@ -3,7 +3,7 @@ package com.app.turismo.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/public")
@@ -27,6 +27,12 @@ public class PublicController {
     @GetMapping("/register")
     public String registerPage() {
         return "register"; // Devuelve la plantilla register.html
+    }
+
+    @GetMapping("/mis-paquetes")
+    public String misPaquetesPage() {
+        return "mis-paquetes"; // Devuelve la plantilla mis-paquetes.html
+
     }
 }
 

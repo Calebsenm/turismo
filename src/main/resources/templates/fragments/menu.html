@@ -13,12 +13,14 @@
             <ul class="nav nav-pills">
                 <li class="nav-item"><a th:href="@{/public/home}" class="nav-link active" aria-current="page">Inicio</a></li>
                 <li class="nav-item"><a th:href="@{/public/armar-paquete}" class="nav-link">Armar Paquete</a></li>
+                <li class="nav-item"><a th:href="@{/public/mis-paquetes}" class="nav-link">Mis Paquetes</a></li>
                 <li class="nav-item" id="admin-menu-item" style="display:none;"><a th:href="@{/admin-panel}" class="nav-link">Panel Admin</a></li>
+                <li class="nav-item"><span id="user-name" class="nav-link text-primary"></span></li>
                 <li class="nav-item"><button id="logout-button" class="btn btn-danger ms-2">Cerrar Sesión</button></li>
             </ul>
         </header>
     <script>
-        // Mostrar el menú de admin solo si el usuario es admin
+        // Mostrar el menú de admin solo si el usuario es admin y mostrar el nombre del usuario logueado
         document.addEventListener('DOMContentLoaded', async function() {
             const token = localStorage.getItem('jwtToken');
             if (token) {
@@ -30,6 +32,9 @@
                         const data = await res.json();
                         if (data.userType && data.userType.toUpperCase() === 'ADMIN') {
                             document.getElementById('admin-menu-item').style.display = '';
+                        }
+                        if (data.name) {
+                            document.getElementById('user-name').textContent = data.name;
                         }
                     }
                 } catch (e) {}

@@ -25,9 +25,130 @@ import java.util.stream.Collectors;
 
 @Service
 public class PaqueteService {
+    // Devuelve los paquetes de un usuario por su id
+    public List<PaqueteDTO> listarPaquetesPorUsuarioId(Long id) {
+        if (id == null)
+            return List.of();
+        // Usar un método personalizado en el repositorio para traer los paquetes con
+        // hoteles, transportes y actividades inicializados
+        List<PaqueteEntity> paquetes = paqueteRepository.findByUsuarioIdWithAllRelations(id);
+        return paquetes.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Permite buscar usuario por email desde el controlador
+    public Optional<UsuarioEntity> buscarUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
+
+    // Crear paquete desde DTO
+    public PaqueteEntity crearPaqueteDesdeDTO(PaqueteDTO dto) {
+        PaqueteEntity paquete = new PaqueteEntity();
+        // Asignar usuario
+        if (dto.usuarioId != null) {
+            Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findById(dto.usuarioId);
+            usuarioOpt.ifPresent(paquete::setUsuario);
+        }
+        // Asignar destino
+        if (dto.destinoId != null) {
+            Optional<DestinoEntity> destinoOpt = destinoRepository.findById(dto.destinoId);
+            destinoOpt.ifPresent(paquete::setDestino);
+        }
+        paquete.setOrigen(dto.origen);
+        paquete.setFechaInicio(dto.fechaInicio);
+        paquete.setFechaFin(dto.fechaFin);
+        paquete.setNombre(dto.nombre);
+        paquete.setDescripcion(dto.descripcion);
+        paquete.setNumAdultos(dto.numAdultos);
+        paquete.setNumNinos(dto.numNinos);
+        paquete.setTipoPaquete(dto.tipoPaquete);
+        // Asignar hoteles
+        if (dto.hoteles != null) {
+            java.util.Set<HotelEntity> hoteles = dto.hoteles.stream()
+                    .map(id -> hotelRepository.findById(id).orElse(null))
+                    .filter(h -> h != null)
+                    .collect(java.util.stream.Collectors.toSet());
+            paquete.setHoteles(hoteles);
+        }
+        // Asignar transportes
+        if (dto.transportes != null) {
+            java.util.Set<TransporteEntity> transportes = dto.transportes.stream()
+                    .map(id -> transporteRepository.findById(id).orElse(null))
+                    .filter(t -> t != null)
+                    .collect(java.util.stream.Collectors.toSet());
+            paquete.setTransportes(transportes);
+        }
+        // Asignar actividades
+        if (dto.actividades != null) {
+            java.util.Set<ActividadEntity> actividades = dto.actividades.stream()
+                    .map(id -> actividadRepository.findById(id).orElse(null))
+                    .filter(a -> a != null)
+                    .collect(java.util.stream.Collectors.toSet());
+            paquete.setActividades(actividades);
+        }
+        // Calcular costo total (puedes mejorar la lógica)
+        paquete.setCostoTotal(dto.costoTotal != null ? dto.costoTotal : 0.0);
+        return paqueteRepository.save(paquete);
+    }
+
+    // Extrae el email del token JWT (simplificado, depende de tu implementación
+    // real)
+    // Requiere la dependencia jjwt en tu pom.xml
+    // <dependency>
+    // <groupId>io.jsonwebtoken</groupId>
+    // <artifactId>jjwt</artifactId>
+    // <version>0.9.1</version>
+    // </dependency>
+    @org.springframework.beans.factory.annotation.Value("${application.security.jwt.secret-key}")
+    private String jwtSecretKey;
+
+    public String extraerEmailDesdeToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            return null;
+        String token = authHeader.substring(7);
+        try {
+            io.jsonwebtoken.Claims claims = io.jsonwebtoken.Jwts.parser()
+                    .setSigningKey(jwtSecretKey.getBytes())
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject(); // El email suele estar en el subject
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Devuelve los paquetes de un usuario por email
+    public List<PaqueteDTO> listarPaquetesPorEmail(String email) {
+        if (email == null)
+            return List.of();
+        Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findByEmail(email);
+        if (usuarioOpt.isEmpty())
+            return List.of();
+        UsuarioEntity usuario = usuarioOpt.get();
+        List<PaqueteEntity> paquetes = paqueteRepository.findAll().stream()
+                .filter(p -> p.getUsuario() != null && p.getUsuario().getUser_id().equals(usuario.getUser_id()))
+                .toList();
+        // Inicializar manualmente transportes y actividades para cada paquete
+        for (PaqueteEntity p : paquetes) {
+            try {
+                org.hibernate.Hibernate.initialize(p.getTransportes());
+            } catch (Exception e) {
+            }
+            try {
+                org.hibernate.Hibernate.initialize(p.getActividades());
+            } catch (Exception e) {
+            }
+        }
+        return paquetes.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
     // Método de mapeo de entidad a DTO
     private PaqueteDTO mapToDTO(PaqueteEntity entity) {
         PaqueteDTO dto = new PaqueteDTO();
+        dto.paqueteId = entity.getPaquete_id();
         dto.usuarioId = entity.getUsuario() != null ? entity.getUsuario().getUser_id() : null;
         dto.destinoId = entity.getDestino() != null ? entity.getDestino().getDestino_id() : null;
         dto.origen = entity.getOrigen();
@@ -40,6 +161,16 @@ public class PaqueteService {
         dto.numNinos = entity.getNumNinos();
         dto.tipoPaquete = entity.getTipoPaquete();
         // Convertir listas de entidades a listas de IDs
+        // Inicializar manualmente transportes y actividades para evitar
+        // LazyInitializationException
+        try {
+            org.hibernate.Hibernate.initialize(entity.getTransportes());
+        } catch (Exception e) {
+        }
+        try {
+            org.hibernate.Hibernate.initialize(entity.getActividades());
+        } catch (Exception e) {
+        }
         dto.hoteles = entity.getHoteles() != null ? entity.getHoteles().stream().map(h -> h.getHotel_id()).toList()
                 : null;
         dto.transportes = entity.getTransportes() != null

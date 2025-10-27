@@ -5,6 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PaqueteDTO {
+    @JsonProperty("paquete_id")
+    public Long paqueteId;
     @JsonProperty("usuario_id")
     public Long usuarioId;
     @JsonProperty("destino_id")

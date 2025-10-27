@@ -73,9 +73,10 @@ public class UsuarioController {
         com.app.turismo.model.user.CustomUserDetails userDetails = (com.app.turismo.model.user.CustomUserDetails) authentication
                 .getPrincipal();
         UsuarioEntity usuario = userDetails.getUsuario();
-        // Devolver solo los datos necesarios para el frontend
+        // Devolver también el id del usuario
         return ResponseEntity.ok(new java.util.HashMap<String, Object>() {
             {
+                put("user_id", usuario.getUser_id());
                 put("email", usuario.getEmail());
                 put("name", usuario.getName());
                 put("userType", usuario.getUserType());
