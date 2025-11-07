@@ -1,9 +1,9 @@
-// Listener para cerrar sesión en cualquier vista
+    // Listener para cerrar sesión en cualquier vista
 document.addEventListener('DOMContentLoaded', () => {
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
-            localStorage.removeItem('jwtToken');
+            localStorage.removeItem('j  wtToken');
             window.location.href = '/public/login';
         });
     }
@@ -50,7 +50,14 @@ async function cargarDestinos() {
 }
 
 // 🧭 Manejar cambio de destino
-document.getElementById("destino").addEventListener("change", async e => {
+function setupDestinoListener() {
+    const destinoSelect = document.getElementById("destino");
+    if (destinoSelect) {
+        destinoSelect.addEventListener("change", handleDestinoChange);
+    }
+}
+
+async function handleDestinoChange(e) {
     const destinoId = e.target.value;
 
     if (!destinoId) {
@@ -99,7 +106,7 @@ document.getElementById("destino").addEventListener("change", async e => {
             alert("No se pudieron cargar los datos del destino. Intenta nuevamente más tarde.");
         }
     }
-});
+}
 
 // 🧱 Función genérica para cargar <select>
 function cargarSelect(id, items, labelFn) {
@@ -143,45 +150,68 @@ function calcularTotal() {
     // Calcular total de hotel (por noches)
     if (hotel) {
         total += ((parseFloat(hotel.dataset.tarifaAdulto || 0) * adultos) +
-                  (parseFloat(hotel.dataset.tarifaNino || 0) * ninos)) * noches;
+            (parseFloat(hotel.dataset.tarifaNino || 0) * ninos)) * noches;
     }
 
     // Transporte (precio fijo por persona seleccionada)
-    [...document.getElementById("transporte").selectedOptions].forEach(t => {
-        total += parseFloat(t.dataset.precio || 0);
-    });
+    const transporteSelect = document.getElementById("transporte");
+    if (transporteSelect) {
+        [...transporteSelect.selectedOptions].forEach(t => {
+            total += parseFloat(t.dataset.precio || 0);
+        });
+    }
 
     // Actividades (precio por persona)
-    [...document.getElementById("actividades").selectedOptions].forEach(a => {
-        total += parseFloat(a.dataset.precio || 0) * (adultos + ninos);
-    });
-    
-    document.getElementById("total").textContent = total.toLocaleString();
+    const actividadesSelect = document.getElementById("actividades");
+    if (actividadesSelect) {
+        [...actividadesSelect.selectedOptions].forEach(a => {
+            total += parseFloat(a.dataset.precio || 0) * (adultos + ninos);
+        });
+    }
+
+    const totalElement = document.getElementById("total");
+    if (totalElement) {
+        totalElement.textContent = total.toLocaleString();
+    }
     return total;
 }
 
 // 🎧 Escuchar cambios en todos los campos relevantes
-["hotel", "transporte", "actividades", "numAdultos", "numNinos", "fechaInicio", "fechaFin", "origen", "destino"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener("change", calcularTotal);
-        el.addEventListener("input", calcularTotal);
+function setupEventListeners() {
+    ["hotel", "transporte", "actividades", "numAdultos", "numNinos", "fechaInicio", "fechaFin", "origen", "destino"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("change", calcularTotal);
+            if (id === "numAdultos" || id === "numNinos") {
+                el.addEventListener("input", calcularTotal);
+            }
+        }
+    });
+
+    // Configurar botón guardar
+    const btnGuardar = document.getElementById("btnGuardar");
+    if (btnGuardar) {
+        btnGuardar.addEventListener("click", guardarPaquete);
     }
-});
+}
 
 // 🎒 Paquetes prearmados
 async function cargarMisPaquetes() {
     try {
         if (!usuarioId) {
             const cont = document.getElementById("misPaquetes");
-            cont.innerHTML = '<p class="text-center text-muted">No se detectó usuario logueado.</p>';
+            if (cont) {
+                cont.innerHTML = '<p class="text-center text-muted">No se detectó usuario logueado.</p>';
+            }
             return;
         }
         const response = await fetch(`${API}/paquetes/usuario/${usuarioId}`, { headers: getAuthHeaders() });
 
         if (response.status === 401 || response.status === 403) {
             const cont = document.getElementById("misPaquetes");
-            cont.innerHTML = '<p class="text-center text-muted">Inicia sesión para ver tus paquetes.</p>';
+            if (cont) {
+                cont.innerHTML = '<p class="text-center text-muted">Inicia sesión para ver tus paquetes.</p>';
+            }
             return;
         }
 
@@ -190,117 +220,154 @@ async function cargarMisPaquetes() {
         }
         const paquetes = await response.json();
         console.log("📦 Mis paquetes obtenidos:", paquetes);
-        if (Array.isArray(paquetes)) {
-            console.log("Cantidad de paquetes recibidos:", paquetes.length);
-            paquetes.forEach((p, i) => console.log(`Paquete[${i}]:`, p));
-        } else {
-            console.log("Respuesta inesperada, no es un array:", paquetes);
-        }
+        
         const cont = document.getElementById("misPaquetes");
+        if (!cont) return;
+        
         cont.innerHTML = ""; // Limpiar contenido anterior
 
-        if (paquetes.length === 0) {
+        if (!paquetes || paquetes.length === 0) {
             cont.innerHTML = '<p class="text-center text-muted">No tienes paquetes armados aún.</p>';
             return;
         }
 
         paquetes.forEach(p => {
             const idPaquete = p.paquete_id || p.id;
-            const paqueteCard = `
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm paquete-card">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-primary">${p.nombre}</h5>
-                            <p class="card-text flex-grow-1">${p.descripcion}</p>
-                            <ul class="list-unstyled mt-2 mb-3">
-                                <li><small><strong>Origen:</strong> ${p.origen}</small></li>
-                                <li><small><strong>Tipo:</strong> ${p.tipoPaquete}</small></li>
-                            </ul>
-                            <div class="text-end">
-                                <p class="h5 fw-bold text-success mb-3">${(p.costoTotal || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}</p>
-                                <button class="btn btn-secondary btn-sm" onclick="window.open('${API}/paquetes/${idPaquete}/pdf')">
-                                    Generar PDF
-                                </button>
-                                <button class="btn btn-danger btn-sm ms-2" onclick="eliminarMiPaquete(${idPaquete})">
-                                    Eliminar
-                                </button>
-                            </div>
+            const paqueteCard = document.createElement('div');
+            paqueteCard.className = 'col-md-4 mb-4';
+            paqueteCard.innerHTML = `
+                <div class="card h-100 shadow-sm paquete-card">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-primary">${p.nombre}</h5>
+                        <p class="card-text flex-grow-1">${p.descripcion}</p>
+                        <ul class="list-unstyled mt-2 mb-3">
+                            <li><small><strong>Origen:</strong> ${p.origen}</small></li>
+                            <li><small><strong>Tipo:</strong> ${p.tipo_paquete || "Personalizado"}</small></li>
+                        </ul>
+                        <div class="text-end">
+                            <p class="h5 fw-bold text-success mb-3">${(p.costo_total || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}</p>
+                            <button class="btn btn-secondary btn-sm generar-pdf" data-paquete-id="${idPaquete}">
+                                Generar PDF
+                            </button>
+                            <button class="btn btn-danger btn-sm ms-2 eliminar-paquete" data-paquete-id="${idPaquete}">
+                                Eliminar
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
-            cont.innerHTML += paqueteCard;
+            cont.appendChild(paqueteCard);
         });
+
+        // Agregar event listeners para los botones dinámicos
+        document.querySelectorAll('.generar-pdf').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const paqueteId = this.getAttribute('data-paquete-id');
+                const paquete = paquetes.find(p => (p.paquete_id || p.id) == paqueteId);
+                if (paquete) generarPDF(paquete);
+            });
+        });
+
+        document.querySelectorAll('.eliminar-paquete').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const paqueteId = this.getAttribute('data-paquete-id');
+                eliminarMiPaquete(paqueteId);
+            });
+        });
+
     } catch (error) {
         console.error("❌ Error cargando mis paquetes:", error);
         const cont = document.getElementById("misPaquetes");
-        cont.innerHTML = '<p class="text-center text-danger">No se pudieron cargar tus paquetes.</p>';
+        if (cont) {
+            cont.innerHTML = '<p class="text-center text-danger">No se pudieron cargar tus paquetes.</p>';
+        }
     }
 }
 
-window.eliminarMiPaquete = function(id) {
+// 📄 Función para generar PDF desde el backend
+async function generarPDF(p) {
+    const paqueteId = p.paquete_id || p.id;
+    
+    if (!paqueteId) {
+        alert('Error: No se pudo identificar el paquete');
+        return;
+    }
+
+    // Verificar token
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('Error: No estás autenticado. Por favor inicia sesión nuevamente.');
+        window.location.href = '/login.html';
+        return;
+    }
+
+    // Mostrar indicador de carga
+    const btn = document.querySelector(`.generar-pdf[data-paquete-id="${paqueteId}"]`);
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generando...';
+    }
+
+    try {
+        const response = await fetch(`${API}/paquetes/${paqueteId}/pdf`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Error al generar el PDF');
+        }
+
+        // Descargar el PDF
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Paquete_${p.nombre || paqueteId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        alert('Error al generar el PDF: ' + error.message);
+    } finally {
+        // Restaurar botón
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+}
+
+// 🗑️ Función para eliminar paquete
+window.eliminarMiPaquete = function (id) {
     if (!confirm('¿Seguro que deseas eliminar este paquete?')) return;
     fetch(`${API}/paquetes/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
+        headers: getAuthHeaders()
     })
-    .then(res => {
-        if (res.ok) {
-            cargarMisPaquetes();
-        } else {
-            alert('No se pudo eliminar el paquete.');
-        }
-    })
-    .catch(() => alert('Error al eliminar el paquete.'));
+        .then(res => {
+            if (res.ok) {
+                cargarMisPaquetes();
+            } else {
+                alert('No se pudo eliminar el paquete.');
+            }
+        })
+        .catch(() => alert('Error al eliminar el paquete.'));
 }
 
-// 🚀 Inicialización
-let usuarioId = null;
-let token = localStorage.getItem('jwtToken');
-document.addEventListener("DOMContentLoaded", async function() {
-    // Verificar autenticación antes de cargar datos
-    if (!token) {
-        window.location.href = '/public/login';
-        return;
-    }
-    // Opcional: decodificar y verificar expiración del token (si usas JWT estándar)
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.exp && Date.now() / 1000 > payload.exp) {
-            localStorage.removeItem('jwtToken');
-            window.location.href = '/public/login';
-            return;
-        }
-    } catch (e) {
-        // Si el token no es válido, redirigir
-        localStorage.removeItem('jwtToken');
-        window.location.href = '/public/login';
-        return;
-    }
-    cargarDestinos();
-    // Obtener el id del usuario logueado
-    if (token) {
-        try {
-            const res = await fetch(`${API}/usuarios/me`, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                // Buscar el id en varias variantes posibles
-                usuarioId = data.userId || data.id || data.user_id || null;
-                // Si no existe id, intenta con email (solo si el backend lo acepta como identificador)
-                if (!usuarioId && data.email) usuarioId = data.email;
-                // Ahora sí, cargar los paquetes del usuario
-                cargarMisPaquetes();
-            }
-        } catch (e) {}
-    }
-});
-
 // 💾 Manejar clic en Guardar Paquete
-document.getElementById("btnGuardar").addEventListener("click", async () => {
+async function guardarPaquete() {
     const mensajeDiv = document.getElementById("mensaje");
-    mensajeDiv.textContent = ""; // Limpiar mensajes anteriores
+    if (mensajeDiv) {
+        mensajeDiv.textContent = ""; // Limpiar mensajes anteriores
+    }
 
     // Recopilar datos del formulario
     const origen = document.getElementById("origen").value;
@@ -310,38 +377,40 @@ document.getElementById("btnGuardar").addEventListener("click", async () => {
     const actividadId = document.getElementById("actividades").value;
     const fechaInicio = document.getElementById("fechaInicio").value;
     const fechaFin = document.getElementById("fechaFin").value;
-    const numAdultos = parseInt(document.getElementById("numAdultos").value);
-    const numNinos = parseInt(document.getElementById("numNinos").value);
-    const costoTotal = parseFloat(document.getElementById("total").textContent.replace(/\./g, ''));
+    const numAdultos = parseInt(document.getElementById("numAdultos").value) || 0;
+    const numNinos = parseInt(document.getElementById("numNinos").value) || 0;
+    const costoTotal = calcularTotal();
 
-    // Validación simple
+    // Validación mínima
     if (!origen || !destinoId || !hotelId || !fechaInicio || !fechaFin) {
-        mensajeDiv.textContent = "Por favor, completa todos los campos obligatorios (origen, destino, hotel y fechas).";
-        mensajeDiv.className = "alert alert-danger mt-3";
+        if (mensajeDiv) {
+            mensajeDiv.textContent = "Por favor, completa todos los campos obligatorios (origen, destino, hotel y fechas).";
+            mensajeDiv.className = "alert alert-danger mt-3";
+        }
         return;
     }
 
-    // Extraer arrays de IDs (soporta selects múltiples en el futuro)
-    const hotelesIds = hotelId ? [parseInt(hotelId)] : [];
-    const transportesIds = transporteId ? [parseInt(transporteId)] : [];
-    const actividadesIds = actividadId ? [parseInt(actividadId)] : [];
+    // Construir arrays de objetos completos para enviar
+    const hotelesObj = hotelId ? hoteles.filter(h => h.id == hotelId) : [];
+    const transportesObj = transporteId ? transportes.filter(t => t.id == transporteId) : [];
+    const actividadesObj = actividadId ? actividades.filter(a => a.id == actividadId) : [];
 
-    // Construir el objeto del paquete SOLO con IDs
+    // Construir el objeto final del paquete con nombres exactos
     const paquete = {
         usuario_id: usuarioId,
         origen,
         destino_id: parseInt(destinoId),
-        fechaInicio,
-        fechaFin,
-        numAdultos,
-        numNinos,
-        costoTotal,
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        num_adultos: numAdultos,
+        num_ninos: numNinos,
+        costo_total: costoTotal,
         nombre: `Paquete a ${document.getElementById("destino").selectedOptions[0].text}`,
         descripcion: `Paquete personalizado para ${numAdultos} adultos y ${numNinos} niños.`,
-        tipoPaquete: "Personalizado",
-        hoteles: hotelesIds,
-        transportes: transportesIds,
-        actividades: actividadesIds
+        tipo_paquete: "Personalizado",
+        hoteles: hotelesObj,
+        transportes: transportesObj,
+        actividades: actividadesObj
     };
 
     try {
@@ -362,16 +431,73 @@ document.getElementById("btnGuardar").addEventListener("click", async () => {
         }
 
         const nuevoPaquete = await response.json();
-        // Mostrar popup de éxito
-        window.alert("¡Paquete armado exitosamente!");
-        mensajeDiv.textContent = `¡Paquete guardado con éxito! ID del paquete: ${nuevoPaquete.paquete_id}`;
-        mensajeDiv.className = "alert alert-success mt-3";
-            // Actualizar la lista de paquetes del usuario
-            cargarMisPaquetes();
+        alert("¡Paquete armado exitosamente!");
+        if (mensajeDiv) {
+            mensajeDiv.textContent = `¡Paquete guardado con éxito! ID del paquete: ${nuevoPaquete.paquete_id}`;
+            mensajeDiv.className = "alert alert-success mt-3";
+        }
 
+        // Actualizar lista de paquetes
+        cargarMisPaquetes();
     } catch (error) {
         console.error("❌ Error al guardar el paquete:", error);
-        mensajeDiv.textContent = `No se pudo guardar el paquete. ${error.message}`;
-        mensajeDiv.className = "alert alert-danger mt-3";
+        if (mensajeDiv) {
+            mensajeDiv.textContent = `No se pudo guardar el paquete. ${error.message}`;
+            mensajeDiv.className = "alert alert-danger mt-3";
+        }
+    }
+}
+
+// 🚀 Inicialización
+let usuarioId = null;
+document.addEventListener("DOMContentLoaded", async function () {
+    const token = localStorage.getItem('jwtToken');
+    
+    // Verificar autenticación antes de cargar datos
+    if (!token) {
+        window.location.href = '/public/login';
+        return;
+    }
+    
+    // Verificar expiración del token
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && Date.now() / 1000 > payload.exp) {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/public/login';
+            return;
+        }
+    } catch (e) {
+        // Si el token no es válido, redirigir
+        localStorage.removeItem('jwtToken');
+        window.location.href = '/public/login';
+        return;
+    }
+    
+    // Configurar event listeners
+    setupDestinoListener();
+    setupEventListeners();
+    
+    // Cargar datos iniciales
+    cargarDestinos();
+    
+    // Obtener el id del usuario logueado
+    if (token) {
+        try {
+            const res = await fetch(`${API}/usuarios/me`, {
+                headers: getAuthHeaders()
+            });
+            if (res.ok) {
+                const data = await res.json();
+                // Buscar el id en varias variantes posibles
+                usuarioId = data.userId || data.id || data.user_id || null;
+                // Si no existe id, intenta con email (solo si el backend lo acepta como identificador)
+                if (!usuarioId && data.email) usuarioId = data.email;
+                // Ahora sí, cargar los paquetes del usuario
+                cargarMisPaquetes();
+            }
+        } catch (e) {
+            console.error("Error obteniendo datos del usuario:", e);
+        }
     }
 });

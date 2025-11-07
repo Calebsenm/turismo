@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import com.app.turismo.model.PaqueteEntity;
 import com.app.turismo.dto.PaqueteDTO;
 import com.app.turismo.service.PaqueteService;
-import java.io.IOException;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/paquetes")
@@ -21,8 +20,11 @@ import java.io.IOException;
 public class PaqueteController {
     // POST - Crear nuevo paquete
     @PostMapping
-    public ResponseEntity<?> crearPaquete(@RequestBody PaqueteDTO paqueteDTO,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseEntity<?> crearPaquete(
+        @Valid
+        @RequestBody PaqueteDTO paqueteDTO,
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
         try {
             // Si el usuarioId no viene en el DTO, lo extraemos del JWT
             if (paqueteDTO.usuarioId == null && authHeader != null && authHeader.startsWith("Bearer ")) {

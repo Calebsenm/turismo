@@ -51,6 +51,7 @@ public class SecurityConfig {
                                                                 "/api/paquetes/usuario/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin-panel").hasAuthority("ROLE_ADMIN")
+                                                .requestMatchers("/api/paquetes/*/pdf").authenticated()
                                                 .requestMatchers("/api/**").authenticated()
                                                 .anyRequest().authenticated())
                                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -280,4 +280,60 @@ public class PaqueteService {
         paqueteRepository.deleteById(id);
     }
 
+    /**
+     * Obtiene un paquete con todas sus relaciones cargadas (para generación de PDF)
+     * 
+     * @param id ID del paquete
+     * @return Optional con el paquete y todas sus relaciones inicializadas
+     */
+    @Transactional(readOnly = true)
+    public Optional<PaqueteEntity> obtenerPaqueteConRelaciones(Long id) {
+        Optional<PaqueteEntity> paqueteOpt = paqueteRepository.findById(id);
+        
+        if (paqueteOpt.isPresent()) {
+            PaqueteEntity paquete = paqueteOpt.get();
+            // Inicializar todas las colecciones lazy
+            org.hibernate.Hibernate.initialize(paquete.getHoteles());
+            org.hibernate.Hibernate.initialize(paquete.getTransportes());
+            org.hibernate.Hibernate.initialize(paquete.getActividades());
+            org.hibernate.Hibernate.initialize(paquete.getDestino());
+            org.hibernate.Hibernate.initialize(paquete.getUsuario());
+        }
+        
+        return paqueteOpt;
+    }
+
+    /**
+     * Valida que un usuario tenga permisos para acceder a un paquete específico.
+     * Un usuario puede acceder si es el propietario del paquete o si es administrador.
+     * 
+     * @param paqueteId ID del paquete
+     * @param userEmail Email del usuario
+     * @return true si el usuario tiene acceso, false en caso contrario
+     */
+    public boolean validarPermisoUsuario(Long paqueteId, String userEmail) {
+        // Buscar el paquete
+        Optional<PaqueteEntity> paqueteOpt = paqueteRepository.findById(paqueteId);
+        if (paqueteOpt.isEmpty()) {
+            return false;
+        }
+        
+        PaqueteEntity paquete = paqueteOpt.get();
+        
+        // Buscar el usuario
+        Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findByEmail(userEmail);
+        if (usuarioOpt.isEmpty()) {
+            return false;
+        }
+        
+        UsuarioEntity usuario = usuarioOpt.get();
+        
+        // Verificar si el usuario es el propietario del paquete o es administrador
+        boolean esPropietario = paquete.getUsuario() != null 
+                && paquete.getUsuario().getUser_id().equals(usuario.getUser_id());
+        boolean esAdmin = "admin".equalsIgnoreCase(usuario.getUserType());
+        
+        return esPropietario || esAdmin;
+    }
+
 }
