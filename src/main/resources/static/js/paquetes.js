@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-const API = "http://localhost:8080/api";
+const API = "/api";
 let hoteles = [], transportes = [], actividades = [];
 
 // 🔐 Obtener cabeceras con autenticación
