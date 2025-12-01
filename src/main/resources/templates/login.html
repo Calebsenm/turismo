@@ -6,31 +6,42 @@
     <title>Iniciar Sesión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body style="background-color: #F2F2F2;">
     <div class="container">
-        <div class="row justify-content-center" style="margin-top: 10vh;">
-            <div class="col-md-6 col-lg-5">
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-                        <h1 class="card-title text-center mb-4">Iniciar Sesión</h1>
+        <div class="row justify-content-center pt-4" style="margin-top: 5vh;">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-lg border-0 rounded-3">
+                    <div class="card-body p-4"> 
+                        <h1 class="card-title text-center mb-4 fs-4 fw-bold" style="color: #1A2E47;">
+                            🔑 Iniciar Sesión
+                        </h1>
                         <form id="login-form">
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email:</label>
+                                <label for="email" class="form-label fw-semibold small" style="color: #333333;">Email:</label>
                                 <input type="email" id="email" name="email" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label for="password" class="form-label">Contraseña:</label>
+                                <label for="password" class="form-label fw-semibold small" style="color: #333333;">Contraseña:</label>
                                 <input type="password" id="password" name="password" class="form-control" required>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+                            <button type="submit" class="btn w-100 fw-bold py-1 mt-3" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">
+                                Ingresar
+                            </button>
                         </form>
-                        <div id="login-message" class="mt-3"></div>
-                        <p class="mt-3 text-center">¿No tienes una cuenta? <a th:href="@{/public/register}">Regístrate aquí</a></p>
+                        <div id="login-message" class="mt-3 small"></div>
+                        
+                        <p class="mt-3 text-center small" style="color: #333333;">
+                            ¿No tienes una cuenta? 
+                            <a th:href="@{/public/register}" class="fw-bold" style="color: #1A2E47;">
+                                Regístrate aquí
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <script th:src="@{/js/login.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

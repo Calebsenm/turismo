@@ -5,269 +5,314 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <script th:src="@{/js/auth-guard.js}"></script>
-</head>
-<body class="container-fluid mt-4" style="max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px;">
-    <script>
-        // Filtro JS para proteger la vista del panel admin
-        if (!localStorage.getItem('jwtToken')) {
-            document.body.innerHTML = '<div class="container my-5 text-center"><div class="alert alert-danger">Debes iniciar sesión como administrador para acceder al panel.</div></div>';
-            setTimeout(() => window.location.href = '/public/login', 1500);
-        } else {
-            fetch('/api/usuarios/me', {
-                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwtToken') }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.userType || data.userType.toUpperCase() !== 'ADMIN') {
-                    document.body.innerHTML = '<div class="container my-5 text-center"><div class="alert alert-warning">Acceso restringido: solo administradores pueden ver este panel.</div></div>';
-                    setTimeout(() => window.location.href = '/access-denied', 1500);
-                }
-            })
-            .catch(() => {
-                document.body.innerHTML = '<div class="container my-5 text-center"><div class="alert alert-danger">Debes iniciar sesión como administrador para acceder al panel.</div></div>';
-                setTimeout(() => window.location.href = '/public/login', 1500);
-            });
+    <style>
+        /* Estilo para ocultar el contenido mientras se valida (Mantenido) */
+        #admin-content {
+            display: none;
         }
-    </script>
-    <div th:replace="fragments/menu :: menu"></div>
+    </style>
+</head>
+<body class="container-fluid py-4" style="max-width: 1200px; margin: 0 auto; background-color: #F2F2F2;">
 
-    <div class="my-5">
-        <h2 class="text-center mb-4">Panel de Administración</h2>
-        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="destinos-tab" data-bs-toggle="tab" data-bs-target="#destinos" type="button" role="tab">Destinos</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="hoteles-tab" data-bs-toggle="tab" data-bs-target="#hoteles" type="button" role="tab">Hoteles</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="actividades-tab" data-bs-toggle="tab" data-bs-target="#actividades" type="button" role="tab">Actividades</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="transporte-tab" data-bs-toggle="tab" data-bs-target="#transporte" type="button" role="tab">Transporte</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="paquetes-tab" data-bs-toggle="tab" data-bs-target="#paquetes" type="button" role="tab">Paquetes</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab">Usuarios</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="adminTabsContent">
-            <div class="tab-pane fade" id="paquetes" role="tabpanel">
-                <div th:replace="fragments/filtro-paquetes :: filtroPaquetes"></div>
-            </div>
-            <!-- Modales para editar hotel, actividad y transporte -->
-            <div th:replace="fragments/modal-editar-hotel :: modalEditarHotel"></div>
-            <div th:replace="fragments/modal-editar-actividad :: modalEditarActividad"></div>
-            <div th:replace="fragments/modal-editar-transporte :: modalEditarTransporte"></div>
-            <!-- Modal para editar destino -->
-            <div th:replace="fragments/modal-editar-destino :: modalEditarDestino"></div>
-                        <!-- Modal para editar usuario -->
-                        <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-labelledby="modalEditarUsuarioLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="modalEditarUsuarioLabel">Editar Usuario</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                    </div>
-                                    <form id="formEditarUsuario">
-                                        <div class="modal-body">
-                                            <input type="hidden" id="editUserId">
-                                            <div class="mb-3">
-                                                <label for="editNombreUsuario" class="form-label">Nombre</label>
-                                                <input type="text" class="form-control" id="editNombreUsuario" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="editEmailUsuario" class="form-label">Email</label>
-                                                <input type="email" class="form-control" id="editEmailUsuario" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="editTipoUsuario" class="form-label">Tipo de Usuario</label>
-                                                <select id="editTipoUsuario" class="form-select" required>
-                                                    <option value="CLIENT">Cliente</option>
-                                                    <option value="ADMIN">Administrador</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-            <div class="tab-pane fade" id="usuarios" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <h4>Registrar Usuario</h4>
-                        <form id="formUsuario" class="mb-4">
-                            <div class="mb-3">
-                                <label for="nombreUsuario" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="nombreUsuario" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="emailUsuario" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="emailUsuario" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="passwordUsuario" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="passwordUsuario" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tipoUsuario" class="form-label">Tipo de Usuario</label>
-                                <select id="tipoUsuario" class="form-select" required>
-                                    <option value="CLIENT">Cliente</option>
-                                    <option value="ADMIN">Administrador</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Registrar Usuario</button>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
-                        <h4>Lista de Usuarios</h4>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="filtroUsuario" placeholder="Buscar usuario por nombre o email...">
-                        </div>
-                        <div id="listaUsuarios"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade show active" id="destinos" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <h4>Crear Destino</h4>
-                        <form id="formDestino" class="mb-4">
-                            <div class="mb-3">
-                                <label for="nombreDestino" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="nombreDestino" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="descripcionDestino" class="form-label">Descripción</label>
-                                <textarea class="form-control" id="descripcionDestino" rows="2" required></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label for="ubicacionDestino" class="form-label">Ubicación</label>
-                                <input type="text" class="form-control" id="ubicacionDestino" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Guardar Destino</button>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
-                        <h4>Lista de Destinos</h4>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="filtroDestino" placeholder="Buscar destino por nombre...">
-                        </div>
-                        <div id="listaDestinos"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="hoteles" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <h4>Crear Hotel</h4>
-                        <form id="formHotel" class="mb-4">
-                            <div class="mb-3">
-                                <label for="nombreHotel" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="nombreHotel" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tarifaAdultoHotel" class="form-label">Tarifa Adulto</label>
-                                <input type="number" class="form-control" id="tarifaAdultoHotel" required min="0" step="0.01">
-                            </div>
-                            <div class="mb-3">
-                                <label for="tarifaNinoHotel" class="form-label">Tarifa Niño</label>
-                                <input type="number" class="form-control" id="tarifaNinoHotel" required min="0" step="0.01">
-                            </div>
-                            <div class="mb-3">
-                                <label for="destinoHotel" class="form-label">Destino</label>
-                                <select id="destinoHotel" class="form-select" required></select>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Guardar Hotel</button>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
-                        <h4>Lista de Hoteles</h4>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="filtroHotel" placeholder="Buscar hotel por nombre...">
-                        </div>
-                        <div id="listaHoteles"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="actividades" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <h4>Crear Actividad</h4>
-                        <form id="formActividad" class="mb-4">
-                            <div class="mb-3">
-                                <label for="nombreActividad" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="nombreActividad" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="descripcionActividad" class="form-label">Descripción</label>
-                                <textarea class="form-control" id="descripcionActividad" rows="2" required></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label for="precioActividad" class="form-label">Precio</label>
-                                <input type="number" class="form-control" id="precioActividad" required min="0" step="0.01">
-                            </div>
-                            <div class="mb-3">
-                                <label for="destinoActividad" class="form-label">Destino</label>
-                                <select id="destinoActividad" class="form-select" required></select>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Guardar Actividad</button>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
-                        <h4>Lista de Actividades</h4>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="filtroActividad" placeholder="Buscar actividad por nombre...">
-                        </div>
-                        <div id="listaActividades"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="transporte" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <h4>Crear Transporte</h4>
-                        <form id="formTransporte" class="mb-4">
-                            <div class="mb-3">
-                                <label for="tipoTransporte" class="form-label">Tipo</label>
-                                <input type="text" class="form-control" id="tipoTransporte" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="empresaTransporte" class="form-label">Empresa</label>
-                                <input type="text" class="form-control" id="empresaTransporte" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="precioTransporte" class="form-label">Precio</label>
-                                <input type="number" class="form-control" id="precioTransporte" required min="0" step="0.01">
-                            </div>
-                            <div class="mb-3">
-                                <label for="destinoTransporte" class="form-label">Destino</label>
-                                <select id="destinoTransporte" class="form-select" required></select>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Guardar Transporte</button>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
-                        <h4>Lista de Transportes</h4>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="filtroTransporte" placeholder="Buscar transporte por tipo o empresa...">
-                        </div>
-                        <div id="listaTransportes"></div>
-                    </div>
-                </div>
-            </div>
+    <div id="auth-status" class="container my-5 text-center">
+        <div class="spinner-border" style="color: #1A2E47;" role="status">
+            <span class="visually-hidden">Cargando...</span>
         </div>
+        <p class="mt-2" style="color: #333333;">Verificando credenciales...</p>
     </div>
 
-    <div th:replace="fragments/footer :: footer"></div>
+    <div id="admin-content">
+        <div th:replace="fragments/menu :: menu"></div>
+
+        <div class="my-5">
+            <h2 class="text-center mb-4 fw-bold" style="color: #1A2E47; font-size: 1.75rem;">⚙️ Panel de Administración</h2>
+            
+            <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="destinos-tab" data-bs-toggle="tab" data-bs-target="#destinos" type="button" role="tab" aria-selected="true" style="color: #1A2E47; font-weight: 500;">Destinos</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="hoteles-tab" data-bs-toggle="tab" data-bs-target="#hoteles" type="button" role="tab" aria-selected="false" style="color: #333333;">Hoteles</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="actividades-tab" data-bs-toggle="tab" data-bs-target="#actividades" type="button" role="tab" aria-selected="false" style="color: #333333;">Actividades</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="transporte-tab" data-bs-toggle="tab" data-bs-target="#transporte" type="button" role="tab" aria-selected="false" style="color: #333333;">Transporte</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="paquetes-tab" data-bs-toggle="tab" data-bs-target="#paquetes" type="button" role="tab" aria-selected="false" style="color: #333333;">Paquetes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab" aria-selected="false" style="color: #333333;">Usuarios</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content bg-white shadow-sm rounded p-4" id="adminTabsContent">
+                
+                <div class="tab-pane fade" id="paquetes" role="tabpanel">
+                    <div th:replace="fragments/filtro-paquetes :: filtroPaquetes"></div>
+                </div>
+
+                <div th:replace="fragments/modal-editar-hotel :: modalEditarHotel"></div>
+                <div th:replace="fragments/modal-editar-actividad :: modalEditarActividad"></div>
+                <div th:replace="fragments/modal-editar-transporte :: modalEditarTransporte"></div>
+                <div th:replace="fragments/modal-editar-destino :: modalEditarDestino"></div>
+                
+                <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-labelledby="modalEditarUsuarioLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content rounded-3 border-0 shadow-lg">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold" id="modalEditarUsuarioLabel" style="color: #1A2E47;">Editar Usuario</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <form id="formEditarUsuario">
+                                <div class="modal-body">
+                                    <input type="hidden" id="editUserId">
+                                    <div class="mb-3">
+                                        <label for="editNombreUsuario" class="form-label fw-semibold small" style="color: #333333;">Nombre</label>
+                                        <input type="text" class="form-control" id="editNombreUsuario" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editEmailUsuario" class="form-label fw-semibold small" style="color: #333333;">Email</label>
+                                        <input type="email" class="form-control" id="editEmailUsuario" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editTipoUsuario" class="form-label fw-semibold small" style="color: #333333;">Tipo de Usuario</label>
+                                        <select id="editTipoUsuario" class="form-select" required>
+                                            <option value="CLIENT">Cliente</option>
+                                            <option value="ADMIN">Administrador</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 pt-0">
+                                    <button type="button" class="btn btn-sm fw-semibold" data-bs-dismiss="modal" style="background-color: #e3e3e3; border-color: #e3e3e3; color: #333333;">Cancelar</button>
+                                    <button type="submit" class="btn btn-sm fw-bold" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="usuarios" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6 border-end pe-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Registrar Usuario</h4>
+                            <form id="formUsuario" class="mb-4">
+                                <div class="mb-3">
+                                    <label for="nombreUsuario" class="form-label fw-semibold small" style="color: #333333;">Nombre</label>
+                                    <input type="text" class="form-control" id="nombreUsuario" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="emailUsuario" class="form-label fw-semibold small" style="color: #333333;">Email</label>
+                                    <input type="email" class="form-control" id="emailUsuario" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="passwordUsuario" class="form-label fw-semibold small" style="color: #333333;">Contraseña</label>
+                                    <input type="password" class="form-control" id="passwordUsuario" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tipoUsuario" class="form-label fw-semibold small" style="color: #333333;">Tipo de Usuario</label>
+                                    <select id="tipoUsuario" class="form-select" required>
+                                        <option value="CLIENT">Cliente</option>
+                                        <option value="ADMIN">Administrador</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn fw-bold w-100 mt-2" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">Registrar Usuario</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6 ps-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Lista de Usuarios</h4>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="filtroUsuario" placeholder="Buscar usuario por nombre o email...">
+                            </div>
+                            <div id="listaUsuarios"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade show active" id="destinos" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6 border-end pe-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Crear Destino</h4>
+                            <form id="formDestino" class="mb-4">
+                                <div class="mb-3">
+                                    <label for="nombreDestino" class="form-label fw-semibold small" style="color: #333333;">Nombre</label>
+                                    <input type="text" class="form-control" id="nombreDestino" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="descripcionDestino" class="form-label fw-semibold small" style="color: #333333;">Descripción</label>
+                                    <textarea class="form-control" id="descripcionDestino" rows="2" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ubicacionDestino" class="form-label fw-semibold small" style="color: #333333;">Ubicación</label>
+                                    <input type="text" class="form-control" id="ubicacionDestino" required>
+                                </div>
+                                <button type="submit" class="btn fw-bold w-100 mt-2" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">Guardar Destino</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6 ps-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Lista de Destinos</h4>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="filtroDestino" placeholder="Buscar destino por nombre...">
+                            </div>
+                            <div id="listaDestinos"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="hoteles" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6 border-end pe-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Crear Hotel</h4>
+                            <form id="formHotel" class="mb-4">
+                                <div class="mb-3">
+                                    <label for="nombreHotel" class="form-label fw-semibold small" style="color: #333333;">Nombre</label>
+                                    <input type="text" class="form-control" id="nombreHotel" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tarifaAdultoHotel" class="form-label fw-semibold small" style="color: #333333;">Tarifa Adulto</label>
+                                    <input type="number" class="form-control" id="tarifaAdultoHotel" required min="0" step="0.01">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tarifaNinoHotel" class="form-label fw-semibold small" style="color: #333333;">Tarifa Niño</label>
+                                    <input type="number" class="form-control" id="tarifaNinoHotel" required min="0" step="0.01">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="destinoHotel" class="form-label fw-semibold small" style="color: #333333;">Destino</label>
+                                    <select id="destinoHotel" class="form-select" required></select>
+                                </div>
+                                <button type="submit" class="btn fw-bold w-100 mt-2" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">Guardar Hotel</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6 ps-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Lista de Hoteles</h4>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="filtroHotel" placeholder="Buscar hotel por nombre...">
+                            </div>
+                            <div id="listaHoteles"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="actividades" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6 border-end pe-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Crear Actividad</h4>
+                            <form id="formActividad" class="mb-4">
+                                <div class="mb-3">
+                                    <label for="nombreActividad" class="form-label fw-semibold small" style="color: #333333;">Nombre</label>
+                                    <input type="text" class="form-control" id="nombreActividad" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="descripcionActividad" class="form-label fw-semibold small" style="color: #333333;">Descripción</label>
+                                    <textarea class="form-control" id="descripcionActividad" rows="2" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="precioActividad" class="form-label fw-semibold small" style="color: #333333;">Precio</label>
+                                    <input type="number" class="form-control" id="precioActividad" required min="0" step="0.01">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="destinoActividad" class="form-label fw-semibold small" style="color: #333333;">Destino</label>
+                                    <select id="destinoActividad" class="form-select" required></select>
+                                </div>
+                                <button type="submit" class="btn fw-bold w-100 mt-2" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">Guardar Actividad</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6 ps-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Lista de Actividades</h4>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="filtroActividad" placeholder="Buscar actividad por nombre...">
+                            </div>
+                            <div id="listaActividades"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="transporte" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6 border-end pe-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Crear Transporte</h4>
+                            <form id="formTransporte" class="mb-4">
+                                <div class="mb-3">
+                                    <label for="tipoTransporte" class="form-label fw-semibold small" style="color: #333333;">Tipo</label>
+                                    <input type="text" class="form-control" id="tipoTransporte" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empresaTransporte" class="form-label fw-semibold small" style="color: #333333;">Empresa</label>
+                                    <input type="text" class="form-control" id="empresaTransporte" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="precioTransporte" class="form-label fw-semibold small" style="color: #333333;">Precio</label>
+                                    <input type="number" class="form-control" id="precioTransporte" required min="0" step="0.01">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="destinoTransporte" class="form-label fw-semibold small" style="color: #333333;">Destino</label>
+                                    <select id="destinoTransporte" class="form-select" required></select>
+                                </div>
+                                <button type="submit" class="btn fw-bold w-100 mt-2" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">Guardar Transporte</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6 ps-4">
+                            <h4 class="mb-4 fw-bold" style="color: #1A2E47;">Lista de Transportes</h4>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="filtroTransporte" placeholder="Buscar transporte por tipo o empresa...">
+                            </div>
+                            <div id="listaTransportes"></div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div th:replace="fragments/footer :: footer"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('jwtToken');
+            const authStatus = document.getElementById('auth-status');
+            const adminContent = document.getElementById('admin-content');
+            
+            // Función para mostrar error y redirigir
+            const showErrorAndRedirect = (message, redirectUrl = '/public/login', type = 'danger') => {
+                authStatus.innerHTML = `<div class="container my-5 text-center"><div class="alert alert-${type}">${message}</div></div>`;
+                setTimeout(() => window.location.href = redirectUrl, 1500);
+            };
+
+            if (!token) {
+                showErrorAndRedirect('Debes iniciar sesión para acceder al panel.');
+            } else {
+                fetch('/api/usuarios/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                })
+                .then(res => {
+                    if (res.status === 401) { // Token expirado o inválido
+                        return Promise.reject(new Error('Token inválido o expirado.'));
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.userType && data.userType.toUpperCase() === 'ADMIN') {
+                        // Autorización exitosa
+                        authStatus.style.display = 'none';
+                        adminContent.style.display = 'block';
+                    } else {
+                        // Usuario autenticado pero no es ADMIN
+                        showErrorAndRedirect('Acceso restringido: solo administradores pueden ver este panel.', '/access-denied', 'warning');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error de autenticación:', error);
+                    // Esto incluye errores de red y el error 'Token inválido' capturado arriba
+                    showErrorAndRedirect('Debes iniciar sesión como administrador para acceder al panel.');
+                });
+            }
+        });
+    </script>
+
     <script th:src="@{/js/admin.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

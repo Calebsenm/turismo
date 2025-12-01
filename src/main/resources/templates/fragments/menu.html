@@ -1,4 +1,3 @@
-<!-- fragments/menu.html -->
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -9,39 +8,47 @@
     <div th:fragment="menu">
         <header class="menu-header">
             <div class="menu-logo">
-                <span style="font-size:1.5rem;vertical-align:middle;">&#128747;</span>
-                <span class="fs-4">TravelCo</span>
+                <span style="font-size:1.5rem;vertical-align:middle; color: #1A2E47;">&#128747;</span>
+                <span class="fs-4" style="color: #1A2E47; font-weight: 600;">TravelCo</span>
             </div>
             <nav class="menu-nav">
                 <ul class="nav nav-center">
                     <li class="nav-item">
-                        <a th:href="@{/public/home}" class="nav-link active" aria-current="page">
+                        <a th:href="@{/public/home}" class="nav-link active" aria-current="page" style="color: #1A2E47 !important;">
                             <span style="font-size:1.2em;vertical-align:middle;">&#127968;</span> Inicio
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a th:href="@{/public/armar-paquete}" class="nav-link">
+                        <a th:href="@{/public/armar-paquete}" class="nav-link" style="color: #1A2E47;">
                             <span style="font-size:1.2em;vertical-align:middle;">&#128197;</span> Armar Paquete
                         </a>
                     </li>
                     <li class="nav-item" id="admin-menu-item" style="display:none;">
-                        <a th:href="@{/admin-panel}" class="nav-link">
+                        <a th:href="@{/admin-panel}" class="nav-link" style="color: #1A2E47;">
                             <span style="font-size:1.2em;vertical-align:middle;">&#128295;</span> Panel Admin
                         </a>
                     </li>
                 </ul>
             </nav>
             <div class="menu-user">
-                <span id="user-name" class="nav-link text-primary"></span>
-                <button id="logout-button" class="btn btn-danger ms-2">Cerrar Sesión</button>
+                <span id="user-name" class="nav-link user-name-style"></span>
+                <button id="logout-button" class="btn btn-custom-accent ms-2">Cerrar Sesión</button>
             </div>
         </header>
         <style>
+            /* Paleta:
+             * Principal: #1A2E47 (Azul Marino)
+             * Acento: #D48C5B (Naranja Quemado)
+             * Neutro: #F2F2F2 (Gris Claro)
+             * Texto: #333333 (Negro Suave)
+            */
+            
             .menu-header {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding: 0.7rem 1.5rem 0.2rem 1.5rem;
+                /* Reducido el padding inferior y ajustado el superior */
+                padding: 0.8rem 1.5rem; 
                 border-bottom: 1px solid #e3e3e3;
                 background: #fff;
             }
@@ -49,6 +56,7 @@
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
+                color: #1A2E47; /* Color principal */
             }
             .menu-nav {
                 flex: 1;
@@ -61,34 +69,70 @@
                 margin: 0;
                 padding: 0;
             }
+            /* CORRECCIÓN DE PROPORCIONALIDAD: Alinear elementos horizontalmente */
             .menu-user {
                 display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                min-width: 120px;
+                align-items: center; /* Alinea verticalmente el texto y el botón */
+                justify-content: flex-end; /* Asegura que se peguen a la derecha */
+                min-width: 200px; /* Suficiente espacio para el nombre y el botón */
+                /* Quitamos flex-direction: column; */
+            }
+            .user-name-style {
+                /* Estilo para el nombre de usuario */
+                color: #333333; /* Color de Texto */
+                font-weight: 500;
+                margin-right: 0.5rem; /* Pequeño espacio entre el nombre y el botón */
+            }
+
+            /* ESTILO MINIMALISTA DEL BOTÓN (Usando el color de acento) */
+            .btn-custom-accent {
+                background-color: #D48C5B; /* Naranja Quemado Sutil (Acento) */
+                border-color: #D48C5B;
+                color: white;
+                font-size: 0.875rem; /* Un poco más pequeño y sutil */
+                padding: 0.4rem 1rem;
+                border-radius: 4px; /* Ligeramente redondeado */
+                transition: background-color 0.3s ease;
+            }
+            .btn-custom-accent:hover {
+                background-color: #b87a4c; /* Oscurecer al pasar el ratón */
+                border-color: #b87a4c;
+            }
+
+            /* Asegurando que los enlaces sigan el estilo */
+            .menu-nav a {
+                color: #333333; /* Color de Texto */
+                padding: 0.5rem 0;
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+            .menu-nav a:hover,
+            .menu-nav .active {
+                color: #1A2E47 !important; /* Color Principal al pasar el ratón/activo */
+                /* Indicador minimalista de activo: */
+                border-bottom: 2px solid #D48C5B; 
             }
         </style>
     <script>
-        // Mostrar el menú de admin solo si el usuario es admin y mostrar el nombre del usuario logueado
-        document.addEventListener('DOMContentLoaded', async function() {
-            const token = localStorage.getItem('jwtToken');
-            if (token) {
-                try {
-                    const res = await fetch('/api/usuarios/me', {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.userType && data.userType.toUpperCase() === 'ADMIN') {
-                            document.getElementById('admin-menu-item').style.display = '';
-                        }
-                        if (data.name) {
-                            document.getElementById('user-name').textContent = data.name;
-                        }
+   document.addEventListener('DOMContentLoaded', async function() {
+        const token = localStorage.getItem('jwtToken');
+        if (token) {
+            try {
+                const res = await fetch('/api/usuarios/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.userType && data.userType.toUpperCase() === 'ADMIN') {
+                        document.getElementById('admin-menu-item').style.display = '';
                     }
-                } catch (e) {}
-            }
-        });
+                    if (data.name) {
+                        document.getElementById('user-name').textContent = data.name;
+                    }
+                }
+            } catch (e) {}
+        }
+    });
     </script>
     </div>
 </body>

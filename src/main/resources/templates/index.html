@@ -6,56 +6,58 @@
     <title>Bienvenido</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <!-- Guardia de autenticación: se ejecuta antes de cargar el cuerpo de la página -->
     <script th:src="@{/js/auth-guard.js}"></script>
 </head>
-<body class="container-fluid mt-4" style="max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px;">
+<body class="container-fluid mt-4" style="max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px; background-color: #F2F2F2;">
 
-    <!-- Fragmento de menú reutilizable -->
     <div th:replace="fragments/menu :: menu"></div>
 
-    <!-- Hero principal -->
-    <section class="text-center py-4 mb-3 bg-light rounded border border-2" style="box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="Turismo" class="img-fluid rounded mb-2" style="max-height: 220px; object-fit: cover;">
-        <h1 class="display-6 fw-bold">¡Descubre Colombia con nosotros!</h1>
-        <p class="lead">Explora destinos increíbles, arma tu paquete personalizado y vive experiencias únicas.</p>
-        <a href="/login" class="btn btn-primary btn-lg mt-2">Comienza tu viaje</a>
+    <section class="text-center py-5 mb-5 hero-section"> 
+        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80" 
+             alt="Turismo" class="img-fluid rounded-3 mb-4" 
+             style="max-height: 280px; width: 100%; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <h1 class="display-6 fw-bold" style="color: #1A2E47;">¡Descubre Colombia con nosotros!</h1>
+        <p class="lead" style="color: #333333;">Explora destinos increíbles, arma tu paquete personalizado y vive experiencias únicas.</p>
+        <a href="/login" class="btn btn-custom-accent btn-lg mt-3">Comienza tu viaje</a>
     </section>
 
-    <!-- Cards de servicios -->
-    <div class="row mb-4">
-        <div class="col-md-4 mb-2">
-            <div class="card h-100 border border-2 rounded-3">
-                <img src="https://images.unsplash.com/photo-1465156799763-2c087c332922?auto=format&fit=crop&w=400&q=80" class="card-img-top rounded-top-3" alt="Playas">
-                <div class="card-body py-2">
-                    <h5 class="card-title">Playas y destinos</h5>
+    <h2 class="text-center mb-4" style="color: #1A2E47; font-weight: 600;">Nuestros Servicios</h2>
+    <div class="row mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 card-minimalist">
+                <img src="https://images.unsplash.com/photo-1465156799763-2c087c332922?auto=format&fit=crop&w=600&q=80" 
+                     class="card-img-top card-img-minimalist" alt="Playas">
+                <div class="card-body py-4">
+                    <h5 class="card-title" style="color: #1A2E47;">Playas y destinos</h5>
                     <p class="card-text">Descubre los mejores destinos turísticos de Colombia: playas, ciudades, naturaleza y cultura.</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-2">
-            <div class="card h-100 border border-2 rounded-3">
-                <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80" class="card-img-top rounded-top-3" alt="Paquetes">
-                <div class="card-body py-2">
-                    <h5 class="card-title">Arma tu paquete</h5>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 card-minimalist">
+                <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80" 
+                     class="card-img-top card-img-minimalist" alt="Paquetes">
+                <div class="card-body py-4">
+                    <h5 class="card-title" style="color: #1A2E47;">Arma tu paquete</h5>
                     <p class="card-text">Personaliza tu viaje eligiendo hoteles, transportes y actividades a tu medida.</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-2">
-            <div class="card h-100 border border-2 rounded-3">
-                <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" class="card-img-top rounded-top-3" alt="Experiencias">
-                <div class="card-body py-2">
-                    <h5 class="card-title">Experiencias únicas</h5>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 card-minimalist">
+                <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80" 
+                     class="card-img-top card-img-minimalist" alt="Experiencias">
+                <div class="card-body py-4">
+                    <h5 class="card-title" style="color: #1A2E47;">Experiencias únicas</h5>
                     <p class="card-text">Vive actividades inolvidables: tours, deportes, gastronomía y cultura local.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Fragmento de footer reutilizable -->
     <div th:replace="fragments/footer :: footer"></div>
 
     <script th:src="@{/js/main.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

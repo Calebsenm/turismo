@@ -1,33 +1,34 @@
 <div th:fragment="modalEditarTransporte">
   <div class="modal fade" id="modalEditarTransporte" tabindex="-1" aria-labelledby="modalEditarTransporteLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form id="formEditarTransporte" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalEditarTransporteLabel">Editar transporte</h5>
+      <form id="formEditarTransporte" class="modal-content rounded-3 border-0 shadow-lg">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" id="modalEditarTransporteLabel" style="color: #1A2E47;">Editar Transporte</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="editTransporteId">
-          <div class="mb-2">
-            <label for="editTipoTransporte" class="form-label">Tipo</label>
+          <div class="mb-3">
+            <label for="editTipoTransporte" class="form-label fw-semibold small" style="color: #333333;">Tipo</label>
             <input type="text" class="form-control" id="editTipoTransporte" required>
           </div>
-          <div class="mb-2">
-            <label for="editEmpresaTransporte" class="form-label">Empresa</label>
+          <div class="mb-3">
+            <label for="editEmpresaTransporte" class="form-label fw-semibold small" style="color: #333333;">Empresa</label>
             <input type="text" class="form-control" id="editEmpresaTransporte" required>
           </div>
-          <div class="mb-2">
-            <label for="editPrecioTransporte" class="form-label">Precio</label>
+          <div class="mb-3">
+            <label for="editPrecioTransporte" class="form-label fw-semibold small" style="color: #333333;">Precio</label>
             <input type="number" class="form-control" id="editPrecioTransporte" required>
           </div>
-          <div class="mb-2">
-            <label for="editDestinoTransporte" class="form-label">Destino</label>
+          <div class="mb-3">
+            <label for="editDestinoTransporte" class="form-label fw-semibold small" style="color: #333333;">Destino</label>
             <select class="form-select" id="editDestinoTransporte" required></select>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Guardar cambios</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <div class="modal-footer border-0 pt-0">
+          <button type="submit" class="btn fw-bold" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">Guardar Cambios</button>
+          
+          <button type="button" class="btn fw-semibold" data-bs-dismiss="modal" style="background-color: #e3e3e3; border-color: #e3e3e3; color: #333333;">Cancelar</button>
         </div>
       </form>
     </div>

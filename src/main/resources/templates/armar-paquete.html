@@ -5,102 +5,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cotizador de Paquete Turístico</title>
-    <!-- Guardia de autenticación -->
     <script th:src="@{/js/auth-guard.js}"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
+    </head>
 
-<body class="container-fluid" style="max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px;">
-    <!-- Fragmento de menú reutilizable -->
+<body class="container-fluid" style="max-width: 1200px; margin: 0 auto; padding: 0 24px; background-color: #F2F2F2;">
     <div th:replace="fragments/menu :: menu"></div>
 
     <div class="my-5">
-        <h2 class="text-center mb-5">🌴 Crea tu paquete turístico ideal</h2>
+        <h2 class="text-center mb-5" style="color: #1A2E47; font-weight: 700;">🌴 Crea tu paquete turístico ideal</h2>
 
-        <!-- 🔹 Barra superior tipo Airbnb -->
-        <div class="card filtro-bar shadow-sm p-3 mb-4">
-            <div class="row align-items-end gy-3 gx-3 text-center text-md-start">
-
-                <!-- Origen -->
+        <div class="card filtro-bar p-4 mb-5" style="border: none; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); background-color: white;">
+            <div class="row align-items-end gy-3 gx-4 text-center text-md-start">
+                
                 <div class="col-md-2">
-                    <label class="form-label fw-bold">🏙️ Origen</label>
-                    <input type="text" id="origen" class="form-control" placeholder="Ej. Montería" required>
+                    <label class="form-label label-custom">🏙️ Origen</label>
+                    <input type="text" id="origen" class="form-control input-custom" placeholder="Ej. Montería" required>
                 </div>
 
-                <!-- Destino -->
                 <div class="col-md-2">
-                    <label class="form-label fw-bold">🗺️ Destino</label>
-                    <select id="destino" class="form-select" required>
+                    <label class="form-label label-custom">🗺️ Destino</label>
+                    <select id="destino" class="form-select select-custom" required>
                         <option value="">Selecciona destino...</option>
                     </select>
                 </div>
 
-                <!-- Adultos -->
                 <div class="col-md-2">
-                    <label class="form-label fw-bold">👨 Adultos</label>
-                    <input type="number" id="numAdultos" class="form-control text-center" value="2" min="1">
+                    <label class="form-label label-custom">👨 Adultos</label>
+                    <input type="number" id="numAdultos" class="form-control input-custom text-center" value="2" min="1">
                 </div>
 
-                <!-- Niños -->
                 <div class="col-md-2">
-                    <label class="form-label fw-bold">🧒 Niños</label>
-                    <input type="number" id="numNinos" class="form-control text-center" value="0" min="0">
+                    <label class="form-label label-custom">🧒 Niños</label>
+                    <input type="number" id="numNinos" class="form-control input-custom text-center" value="0" min="0">
                 </div>
 
-                <!-- Fecha salida -->
                 <div class="col-md-2">
-                    <label class="form-label fw-bold">📅 Salida</label>
-                    <input type="date" id="fechaInicio" class="form-control">
+                    <label class="form-label label-custom">📅 Salida</label>
+                    <input type="date" id="fechaInicio" class="form-control input-custom">
                 </div>
 
-                <!-- Fecha regreso -->
                 <div class="col-md-2">
-                    <label class="form-label fw-bold">📅 Regreso</label>
-                    <input type="date" id="fechaFin" class="form-control">
+                    <label class="form-label label-custom">📅 Regreso</label>
+                    <input type="date" id="fechaFin" class="form-control input-custom">
                 </div>
             </div>
         </div>
 
-        <!-- 🔹 Sección para personalizar paquete -->
-        <div class="card p-4 mb-4 shadow-sm" id="seccion-opciones" style="display:none;">
-            <h4>🎨 Personaliza tu paquete</h4>
+        <div class="card p-4 mb-4" id="seccion-opciones" style="display:none; border: none; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); background-color: white;">
+            <h4 style="color: #1A2E47; font-weight: 600;">🎨 Personaliza tu paquete</h4>
 
-            <div class="row mt-3">
+            <div class="row mt-4">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">🏨 Hotel</label>
-                    <select id="hotel" class="form-select mb-3" required></select>
+                    <label class="form-label label-custom">🏨 Hotel</label>
+                    <select id="hotel" class="form-select select-custom mb-3" required></select>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">🚗 Transporte disponible</label>
-                    <select id="transporte" class="form-select mb-3" required></select>
+                    <label class="form-label label-custom">🚗 Transporte disponible</label>
+                    <select id="transporte" class="form-select select-custom mb-3" required></select>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">🎟️ Actividades opcionales</label>
-                <select id="actividades" class="form-select" required></select>
+            <div class="mb-4">
+                <label class="form-label label-custom">🎟️ Actividades opcionales</label>
+                <select id="actividades" class="form-select select-custom" required></select>
             </div>
 
-            <div class="total-box mt-4 p-3 text-center">
-                💰 <strong>Total estimado:</strong> <span id="total">0</span> COP
+            <div class="total-box mt-4 p-3 text-center" style="border: 2px solid #B2D8BB; background-color: #F2F2F2; border-radius: 6px;">
+                <span style="color: #1A2E47; font-weight: 700;">💰 Total estimado:</span> 
+                <span id="total" style="color: #D48C5B; font-weight: 700; font-size: 1.2rem;">0</span> COP
             </div>
 
-            <button id="btnGuardar" class="btn btn-primary w-100 mt-4">Guardar paquete</button>
+            <button id="btnGuardar" class="btn btn-custom-accent w-100 mt-4">Guardar paquete</button>
         </div>
 
-        <!-- 🔹 Mis Paquetes -->
-        <div class="card p-4 shadow-sm">
-            <h4>🌟 Mis Paquetes</h4>
-            <div id="misPaquetes" class="row mt-3"></div>
+        <div class="card p-4" style="border: none; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); background-color: white;">
+            <h4 style="color: #1A2E47; font-weight: 600;">🌟 Mis Paquetes</h4>
+            <div id="misPaquetes" class="row mt-4">
+                </div>
         </div>
 
         <div id="mensaje" class="mt-3 text-center"></div>
     </div>
 
+    <style>
+        /* Paleta de Colores:
+         * Principal (Títulos): #1A2E47 (Azul Marino)
+         * Secundario (Bordes/Resaltado): #B2D8BB (Verde Menta Suave)
+         * Acento (Botones): #D48C5B (Naranja Quemado Sutil)
+         * Neutro (Fondo): #F2F2F2 (Gris Claro Cálido)
+         * Texto: #333333 (Negro Suave)
+        */
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* Estilo de la etiqueta (Label) */
+        .label-custom {
+            color: #333333; 
+            font-weight: 600 !important;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Estilo general para inputs y selects */
+        .input-custom, .select-custom {
+            border-radius: 4px;
+            border: 1px solid #e3e3e3; 
+            color: #333333;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.95rem;
+        }
+        
+        .input-custom:focus, .select-custom:focus {
+            border-color: #B2D8BB; 
+            box-shadow: 0 0 0 0.15rem rgba(178, 216, 187, 0.5)
+        }
+        
+        /* Botón de Acento (Naranja Quemado) */
+        .btn-custom-accent {
+            background-color: #D48C5B; 
+            border-color: #D48C5B;
+            color: white;
+            font-weight: 600;
+            padding: 0.6rem 2rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom-accent:hover {
+            background-color: #b87a4c; 
+            border-color: #b87a4c;
+            color: white;
+            transform: translateY(-1px); 
+        }
+
+        /* Ajuste para el div principal (para separación) */
+        .my-5 {
+            margin-top: 3rem !important;
+            margin-bottom: 3rem !important;
+        }
+        
+        /* Estilo para los Paquetes guardados (si se usan cards) */
+        #misPaquetes .card {
+            border: 1px solid #e3e3e3;
+            border-left: 5px solid #1A2E47; /* Borde de color principal */
+            box-shadow: none;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+        }
+        
+        #misPaquetes .card-title {
+            color: #1A2E47;
+            font-weight: 600;
+        }
+    </style>
+
     <script th:src="@{/js/paquetes.js}"></script>
 
-    <!-- Fragmento de footer reutilizable -->
     <div th:replace="fragments/footer :: footer"></div>
 </body>
 

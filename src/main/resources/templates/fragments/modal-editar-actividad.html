@@ -1,33 +1,34 @@
 <div th:fragment="modalEditarActividad">
   <div class="modal fade" id="modalEditarActividad" tabindex="-1" aria-labelledby="modalEditarActividadLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form id="formEditarActividad" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalEditarActividadLabel">Editar actividad</h5>
+      <form id="formEditarActividad" class="modal-content rounded-3 border-0 shadow-lg">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" id="modalEditarActividadLabel" style="color: #1A2E47;">Editar Actividad</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="editActividadId">
-          <div class="mb-2">
-            <label for="editNombreActividad" class="form-label">Nombre</label>
+          <div class="mb-3">
+            <label for="editNombreActividad" class="form-label fw-semibold small" style="color: #333333;">Nombre</label>
             <input type="text" class="form-control" id="editNombreActividad" required>
           </div>
-          <div class="mb-2">
-            <label for="editDescripcionActividad" class="form-label">Descripción</label>
+          <div class="mb-3">
+            <label for="editDescripcionActividad" class="form-label fw-semibold small" style="color: #333333;">Descripción</label>
             <input type="text" class="form-control" id="editDescripcionActividad" required>
           </div>
-          <div class="mb-2">
-            <label for="editPrecioActividad" class="form-label">Precio</label>
-            <input type="number" class="form-control" id="editPrecioActividad" required>
+          <div class="mb-3">
+            <label for="editPrecioActividad" class="form-label fw-semibold small" style="color: #333333;">Precio</label>
+            <input type="number" class="form-control" id="editPrecioActividad" required min="0" step="0.01">
           </div>
-          <div class="mb-2">
-            <label for="editDestinoActividad" class="form-label">Destino</label>
+          <div class="mb-3">
+            <label for="editDestinoActividad" class="form-label fw-semibold small" style="color: #333333;">Destino</label>
             <select class="form-select" id="editDestinoActividad" required></select>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Guardar cambios</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <div class="modal-footer border-0 pt-0">
+          <button type="submit" class="btn fw-bold" style="background-color: #D48C5B; border-color: #D48C5B; color: white;">Guardar Cambios</button>
+          
+          <button type="button" class="btn fw-semibold" data-bs-dismiss="modal" style="background-color: #e3e3e3; border-color: #e3e3e3; color: #333333;">Cancelar</button>
         </div>
       </form>
     </div>
